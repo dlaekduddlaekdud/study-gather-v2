@@ -1,9 +1,11 @@
 package com.studygather.user.service;
 
 import com.studygather.user.dto.request.SignUpRequest;
+import com.studygather.user.dto.response.MyInfoResponse;
 import com.studygather.user.dto.response.SignUpResponse;
 import com.studygather.user.entity.User;
 import com.studygather.user.exception.DuplicateEmailException;
+import com.studygather.user.exception.UserNotFoundException;
 import com.studygather.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,5 +33,13 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         return SignUpResponse.from(savedUser);
+    }
+
+    @Transactional(readOnly = true)
+    public MyInfoResponse getMyInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        return MyInfoResponse.from(user);
     }
 }
