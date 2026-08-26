@@ -1,5 +1,6 @@
 package com.studygather.common.exception;
 
+import com.studygather.auth.exception.InvalidCredentialsException;
 import com.studygather.common.api.ApiResponse;
 import com.studygather.user.exception.DuplicateEmailException;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,15 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidCredentials(
+            InvalidCredentialsException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
 
     @ExceptionHandler(DuplicateEmailException.class)
     public ResponseEntity<ApiResponse<Void>> handleDuplicateEmail(
