@@ -1,0 +1,12 @@
+.DS_Store
+.env
+
+# 개인 참고 문서
+/spring-start-v20260130/
+/*.pdf
+
+backend/.gradle/
+backend/build/
+
+frontend/node_modules/
+frontend/dist/
