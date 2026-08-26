@@ -1,10 +1,12 @@
 package com.studygather.user.service;
 
 import com.studygather.user.dto.request.SignUpRequest;
+import com.studygather.user.dto.response.MyInfoResponse;
 import com.studygather.user.dto.response.SignUpResponse;
 import com.studygather.user.entity.User;
 import com.studygather.user.entity.UserRole;
 import com.studygather.user.exception.DuplicateEmailException;
+import com.studygather.user.exception.UserNotFoundException;
 import com.studygather.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +68,30 @@ class UserServiceTest {
         assertThrows(
                 DuplicateEmailException.class,
                 () -> userService.signUp(duplicateRequest)
+        );
+    }
+
+    @Test
+    void getMyInfoReturnsUserInformation() {
+        SignUpResponse signUpResponse = userService.signUp(new SignUpRequest(
+                "my-info@example.com",
+                "password123",
+                "my-info-user"
+        ));
+
+        MyInfoResponse response = userService.getMyInfo(signUpResponse.id());
+
+        assertEquals(signUpResponse.id(), response.id());
+        assertEquals(signUpResponse.email(), response.email());
+        assertEquals(signUpResponse.nickname(), response.nickname());
+        assertEquals(UserRole.USER, response.role());
+    }
+
+    @Test
+    void getMyInfoRejectsUnknownUser() {
+        assertThrows(
+                UserNotFoundException.class,
+                () -> userService.getMyInfo(Long.MAX_VALUE)
         );
     }
 }
