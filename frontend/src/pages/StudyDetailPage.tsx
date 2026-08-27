@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { getStudy, type StudyDetail } from '../api/studies'
+import { useAuth } from '../auth/AuthContext'
+import { StudyApplicationForm } from '../components/StudyApplicationForm'
 
 type StudyDetailState =
   | { status: 'loading' }
@@ -31,6 +33,7 @@ function getErrorMessage(error: unknown): string {
 }
 
 export function StudyDetailPage() {
+  const { user, accessToken } = useAuth()
   const { studyId: studyIdParam } = useParams()
   const studyId = Number(studyIdParam)
   const isValidStudyId = Number.isSafeInteger(studyId) && studyId > 0
@@ -119,10 +122,33 @@ export function StudyDetailPage() {
         </header>
 
         <div className="study-detail-content">
-          <section aria-labelledby="study-description-heading">
-            <h2 id="study-description-heading">스터디 소개</h2>
-            <p className="study-description">{study.description}</p>
-          </section>
+          <div className="study-detail-main">
+            <section aria-labelledby="study-description-heading">
+              <h2 id="study-description-heading">스터디 소개</h2>
+              <p className="study-description">{study.description}</p>
+            </section>
+
+            <section className="study-application-section" aria-labelledby="study-application-heading">
+              <h2 id="study-application-heading">참여 신청</h2>
+              {!user ? (
+                <div className="application-notice">
+                  <p>로그인하면 이 스터디에 참여 신청할 수 있습니다.</p>
+                  <Link className="text-link" to="/login" state={{ from: `/studies/${study.id}` }}>
+                    로그인하기
+                  </Link>
+                </div>
+              ) : null}
+              {user?.id === study.ownerId ? (
+                <div className="application-notice"><p>내가 운영하는 스터디입니다.</p></div>
+              ) : null}
+              {user && user.id !== study.ownerId && study.status !== 'OPEN' ? (
+                <div className="application-notice"><p>모집이 마감되어 신청할 수 없습니다.</p></div>
+              ) : null}
+              {user && accessToken && user.id !== study.ownerId && study.status === 'OPEN' ? (
+                <StudyApplicationForm studyId={study.id} token={accessToken} />
+              ) : null}
+            </section>
+          </div>
 
           <aside className="study-detail-summary" aria-label="모집 정보">
             <h2>모집 정보</h2>

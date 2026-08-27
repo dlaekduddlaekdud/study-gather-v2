@@ -3,6 +3,7 @@ import { AppLayout } from './components/AppLayout'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
+import { MyApplicationsPage } from './pages/MyApplicationsPage'
 import { MyPage } from './pages/MyPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { StudyDetailPage } from './pages/StudyDetailPage'
@@ -21,6 +22,7 @@ function App() {
         <Route path="signup" element={<SignUpPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="me" element={<MyPage />} />
+          <Route path="applications/me" element={<MyApplicationsPage />} />
           <Route path="studies/new" element={<StudyCreatePage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

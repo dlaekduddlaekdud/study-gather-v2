@@ -102,6 +102,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .study-detail-header > p { margin: 0; color: var(--muted); font-size: 14px; }
 .study-detail-content { padding: clamp(32px, 6vw, 64px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 340px); gap: clamp(40px, 7vw, 90px); align-items: start; }
 .study-detail-content h2 { margin: 0 0 20px; font-size: 19px; letter-spacing: -.5px; }
+.study-detail-main { min-width: 0; }
 .study-description { margin: 0; color: #4e5669; line-height: 1.85; white-space: pre-wrap; }
 .study-detail-summary { padding: 25px; background: #f7f9fd; border: 1px solid #e5e9f2; border-radius: 15px; }
 .study-detail-summary dl { margin: 0; }
@@ -127,6 +128,40 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .study-create-row { margin-top: 24px; display: grid; grid-template-columns: minmax(180px, .65fr) minmax(280px, 1.35fr); gap: 18px; }
 .study-create-row .study-create-field { margin-top: 0; }
 .study-create-form > .submit-button { width: auto; min-width: 180px; margin-left: auto; display: flex; }
+
+.study-application-section { margin-top: 48px; padding-top: 34px; border-top: 1px solid var(--line); }
+.application-form { display: flex; flex-direction: column; }
+.application-form label { margin-bottom: 9px; font-size: 14px; font-weight: 800; }
+.application-form textarea { width: 100%; padding: 14px; resize: vertical; color: var(--navy); background: #fbfcfe; border: 1px solid #dce1eb; border-radius: 9px; outline: none; font: inherit; line-height: 1.65; }
+.application-form textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(49,87,213,.1); }
+.application-form > span { margin-top: 7px; color: var(--muted); font-size: 12px; text-align: right; }
+.application-form .submit-button { width: auto; min-width: 170px; margin-left: auto; }
+.application-notice, .application-complete { padding: 20px; background: #f4f7ff; border: 1px solid #dfe6fa; border-radius: 12px; }
+.application-notice p, .application-complete p { margin: 0; color: var(--muted); line-height: 1.6; }
+.application-complete strong { display: block; margin-bottom: 8px; }
+.application-complete .text-link { display: inline-block; margin-top: 12px; }
+
+.applications-page { width: min(100% - 48px, 880px); min-height: calc(100vh - 137px); margin: 0 auto; padding: 64px 0 80px; }
+.applications-header { margin-bottom: 32px; }
+.applications-header h1 { margin: 10px 0 12px; color: var(--navy); font-size: clamp(36px, 5vw, 52px); letter-spacing: -2.4px; }
+.applications-header > p:last-child { margin: 0; color: var(--muted); }
+.application-list { display: grid; gap: 14px; }
+.application-card { padding: 24px; background: white; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 12px 35px rgba(29,48,93,.06); }
+.application-card__heading, .application-card__footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.application-card__heading > span:last-child { color: #9aa2b2; font-size: 12px; }
+.application-status { padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+.application-status--pending { color: #875b00; background: #fff2cb; }
+.application-status--approved { color: #16704b; background: #ddf7eb; }
+.application-status--rejected { color: #a13d49; background: #ffe7ea; }
+.application-status--canceled { color: #697185; background: #e8eaf0; }
+.application-card h2 { margin: 18px 0 10px; font-size: 20px; }
+.application-card h2 a { color: var(--navy); text-decoration: none; }
+.application-card h2 a:hover { color: var(--blue); }
+.application-card__message { margin: 0 0 22px; color: #596174; line-height: 1.7; white-space: pre-wrap; }
+.application-card__footer { padding-top: 16px; border-top: 1px solid #edf0f5; }
+.application-card__footer time { color: var(--muted); font-size: 12px; }
+.application-cancel-button { padding: 8px 12px; color: #a13d49; background: white; border: 1px solid #e8c5ca; border-radius: 8px; cursor: pointer; font-weight: 700; }
+.application-cancel-button:disabled { opacity: .55; cursor: wait; }
 
 @keyframes study-loading-spin {
   to { transform: rotate(360deg); }
@@ -157,4 +192,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .study-state__actions { flex-direction: column; }
   .study-create-page { width: min(100% - 40px, 980px); padding: 44px 0 64px; }
   .study-create-form > .submit-button { width: 100%; }
+  .application-form .submit-button { width: 100%; }
+  .applications-page { width: min(100% - 40px, 880px); padding: 44px 0 64px; }
+  .application-card__footer { align-items: flex-start; flex-direction: column; }
 }
