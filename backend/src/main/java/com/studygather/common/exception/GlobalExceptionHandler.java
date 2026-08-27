@@ -2,6 +2,7 @@ package com.studygather.common.exception;
 
 import com.studygather.auth.exception.InvalidCredentialsException;
 import com.studygather.common.api.ApiResponse;
+import com.studygather.study.exception.StudyNotFoundException;
 import com.studygather.user.exception.DuplicateEmailException;
 import com.studygather.user.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,15 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(StudyNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleStudyNotFound(
+            StudyNotFoundException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleUserNotFound(

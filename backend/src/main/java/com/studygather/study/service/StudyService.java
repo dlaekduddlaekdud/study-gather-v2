@@ -2,8 +2,11 @@ package com.studygather.study.service;
 
 import com.studygather.study.dto.request.CreateStudyRequest;
 import com.studygather.study.dto.response.StudyResponse;
+import com.studygather.study.dto.response.StudySummaryResponse;
 import com.studygather.study.entity.Study;
 import com.studygather.study.entity.StudyMember;
+import com.studygather.study.entity.StudyStatus;
+import com.studygather.study.exception.StudyNotFoundException;
 import com.studygather.study.repository.StudyMemberRepository;
 import com.studygather.study.repository.StudyRepository;
 import com.studygather.user.entity.User;
@@ -11,6 +14,9 @@ import com.studygather.user.exception.UserNotFoundException;
 import com.studygather.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class StudyService {
@@ -47,5 +53,25 @@ public class StudyService {
         studyMemberRepository.save(ownerMember);
 
         return StudyResponse.from(savedStudy);
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudySummaryResponse> getOpenStudies() {
+        return studyRepository
+                .findAllByStatusAndRecruitmentDeadlineAfterOrderByRecruitmentDeadlineAsc(
+                        StudyStatus.OPEN,
+                        LocalDateTime.now()
+                )
+                .stream()
+                .map(StudySummaryResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public StudyResponse getStudy(Long studyId) {
+        Study study = studyRepository.findById(studyId)
+                .orElseThrow(StudyNotFoundException::new);
+
+        return StudyResponse.from(study);
     }
 }
