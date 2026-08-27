@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { StudySummary } from '../api/studies'
 
 interface StudyCardProps {
@@ -21,7 +22,11 @@ export function StudyCard({ study }: StudyCardProps) {
   const remainingSeats = Math.max(study.capacity - study.approvedCount, 0)
 
   return (
-    <article className="study-card">
+    <Link
+      className="study-card"
+      to={`/studies/${study.id}`}
+      aria-label={`${study.title} 상세 보기`}
+    >
       <div className="study-card__heading">
         <span className="study-card__badge">모집 중</span>
         <span className="study-card__id">#{study.id}</span>
@@ -50,6 +55,6 @@ export function StudyCard({ study }: StudyCardProps) {
         />
         <span>{remainingSeats > 0 ? `${remainingSeats}자리 남음` : '모집 인원 마감'}</span>
       </div>
-    </article>
+    </Link>
   )
 }

@@ -5,8 +5,11 @@ type GetOpenStudiesResponse =
   operations['getOpenStudies']['responses'][200]['content']['*/*']
 type GeneratedStudyList = NonNullable<GetOpenStudiesResponse['data']>
 type GeneratedStudySummary = GeneratedStudyList[number]
+type GetStudyResponse = operations['getStudy']['responses'][200]['content']['*/*']
+type GeneratedStudyDetail = NonNullable<GetStudyResponse['data']>
 
 export type StudySummary = Required<GeneratedStudySummary>
+export type StudyDetail = Required<GeneratedStudyDetail>
 
 function isStudySummary(study: GeneratedStudySummary): study is StudySummary {
   return (
@@ -20,6 +23,20 @@ function isStudySummary(study: GeneratedStudySummary): study is StudySummary {
   )
 }
 
+function isStudyDetail(study: GeneratedStudyDetail): study is StudyDetail {
+  return (
+    typeof study.id === 'number' &&
+    typeof study.ownerId === 'number' &&
+    typeof study.title === 'string' &&
+    typeof study.description === 'string' &&
+    typeof study.capacity === 'number' &&
+    typeof study.approvedCount === 'number' &&
+    typeof study.recruitmentDeadline === 'string' &&
+    typeof study.createdAt === 'string' &&
+    (study.status === 'OPEN' || study.status === 'CLOSED')
+  )
+}
+
 export async function getOpenStudies(signal?: AbortSignal): Promise<StudySummary[]> {
   const studies = await apiRequest<GeneratedStudyList>('/api/studies', { signal })
 
@@ -28,4 +45,14 @@ export async function getOpenStudies(signal?: AbortSignal): Promise<StudySummary
   }
 
   return studies
+}
+
+export async function getStudy(studyId: number, signal?: AbortSignal): Promise<StudyDetail> {
+  const study = await apiRequest<GeneratedStudyDetail>(`/api/studies/${studyId}`, { signal })
+
+  if (!isStudyDetail(study)) {
+    throw new ApiError('스터디 상세 응답 형식이 올바르지 않습니다.', 500)
+  }
+
+  return study
 }
