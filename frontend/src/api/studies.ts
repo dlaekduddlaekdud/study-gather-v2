@@ -10,6 +10,8 @@ type GeneratedStudyDetail = NonNullable<GetStudyResponse['data']>
 type CreateStudyOperation = operations['createStudy']
 type GeneratedCreateStudyRequest =
   CreateStudyOperation['requestBody']['content']['application/json']
+type GeneratedUpdateStudyRequest =
+  operations['updateStudy']['requestBody']['content']['application/json']
 type GetStudyMembersResponse =
   operations['getStudyMembers']['responses'][200]['content']['*/*']
 type GeneratedStudyMemberList = NonNullable<GetStudyMembersResponse['data']>
@@ -18,6 +20,7 @@ type GeneratedStudyMember = GeneratedStudyMemberList[number]
 export type StudySummary = Required<GeneratedStudySummary>
 export type StudyDetail = Required<GeneratedStudyDetail>
 export type CreateStudyRequest = Required<GeneratedCreateStudyRequest>
+export type UpdateStudyRequest = Omit<GeneratedUpdateStudyRequest, 'anyFieldPresent'>
 export type StudyMember = Required<GeneratedStudyMember>
 
 function isStudySummary(study: GeneratedStudySummary): study is StudySummary {
@@ -88,6 +91,24 @@ export async function createStudy(
 
   if (!isStudyDetail(study)) {
     throw new ApiError('스터디 생성 응답 형식이 올바르지 않습니다.', 500)
+  }
+
+  return study
+}
+
+export async function updateStudy(
+  studyId: number,
+  request: UpdateStudyRequest,
+  token: string,
+): Promise<StudyDetail> {
+  const study = await apiRequest<GeneratedStudyDetail>(`/api/studies/${studyId}`, {
+    method: 'PATCH',
+    body: request,
+    token,
+  })
+
+  if (!isStudyDetail(study)) {
+    throw new ApiError('스터디 수정 응답 형식이 올바르지 않습니다.', 500)
   }
 
   return study

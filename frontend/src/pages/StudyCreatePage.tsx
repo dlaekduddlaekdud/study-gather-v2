@@ -3,22 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { createStudy } from '../api/studies'
 import { useAuth } from '../auth/AuthContext'
-
-function toLocalDateTimeInput(date: Date): string {
-  const pad = (value: number) => String(value).padStart(2, '0')
-
-  return [
-    date.getFullYear(),
-    '-',
-    pad(date.getMonth() + 1),
-    '-',
-    pad(date.getDate()),
-    'T',
-    pad(date.getHours()),
-    ':',
-    pad(date.getMinutes()),
-  ].join('')
-}
+import { toLocalDateTimeInput } from '../utils/dateTime'
 
 export function StudyCreatePage() {
   const { accessToken } = useAuth()
