@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
-import { getStudy, type StudyDetail } from '../api/studies'
+import { closeStudy, getStudy, type StudyDetail } from '../api/studies'
 import { useAuth } from '../auth/AuthContext'
 import { StudyApplicationForm } from '../components/StudyApplicationForm'
 
@@ -39,6 +39,8 @@ export function StudyDetailPage() {
   const isValidStudyId = Number.isSafeInteger(studyId) && studyId > 0
   const [state, setState] = useState<StudyDetailState>({ status: 'loading' })
   const [requestVersion, setRequestVersion] = useState(0)
+  const [isClosing, setIsClosing] = useState(false)
+  const [actionError, setActionError] = useState('')
 
   useEffect(() => {
     if (!isValidStudyId) {
@@ -105,6 +107,28 @@ export function StudyDetailPage() {
   const { study } = state
   const remainingSeats = Math.max(study.capacity - study.approvedCount, 0)
 
+  const handleCloseStudy = async () => {
+    if (!accessToken) return
+
+    const confirmed = window.confirm(
+      '스터디 모집을 마감하면 다시 모집 중으로 변경할 수 없습니다. 마감할까요?',
+    )
+    if (!confirmed) return
+
+    setActionError('')
+    setIsClosing(true)
+    try {
+      const closedStudy = await closeStudy(study.id, accessToken)
+      setState({ status: 'success', requestId: study.id, study: closedStudy })
+    } catch (error) {
+      setActionError(error instanceof ApiError
+        ? error.message
+        : '스터디 모집을 마감하지 못했습니다. 잠시 후 다시 시도해 주세요.')
+    } finally {
+      setIsClosing(false)
+    }
+  }
+
   return (
     <section className="study-detail-page">
       <Link className="study-detail-back" to="/studies">← 스터디 목록</Link>
@@ -150,6 +174,19 @@ export function StudyDetailPage() {
                   <Link className="text-link application-notice__link" to={`/studies/${study.id}/edit`}>
                     스터디 수정하기
                   </Link>
+                  {accessToken && study.status === 'OPEN' ? (
+                    <div className="study-owner-actions">
+                      <button
+                        className="study-close-button"
+                        type="button"
+                        onClick={handleCloseStudy}
+                        disabled={isClosing}
+                      >
+                        {isClosing ? '마감하는 중...' : '스터디 모집 마감'}
+                      </button>
+                    </div>
+                  ) : null}
+                  {actionError ? <p className="study-action-error" role="alert">{actionError}</p> : null}
                 </div>
               ) : null}
               {user && user.id !== study.ownerId && study.status !== 'OPEN' ? (

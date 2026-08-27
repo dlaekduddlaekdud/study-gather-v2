@@ -144,6 +144,11 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .application-notice p, .application-complete p { margin: 0; color: var(--muted); line-height: 1.6; }
 .application-notice .text-link { display: inline-block; margin-top: 10px; }
 .application-notice .application-notice__link { margin-left: 18px; }
+.study-owner-actions { margin-top: 20px; padding-top: 18px; border-top: 1px solid #dfe6fa; }
+.study-close-button { padding: 10px 14px; color: #a13d49; background: white; border: 1px solid #e8c5ca; border-radius: 8px; cursor: pointer; font-weight: 800; }
+.study-close-button:hover { background: #fff2f4; }
+.study-close-button:disabled { opacity: .55; cursor: wait; }
+.application-notice .study-action-error { margin-top: 12px; padding: 10px 12px; color: var(--error); background: #fff2f4; border-radius: 8px; font-size: 13px; }
 .application-complete strong { display: block; margin-bottom: 8px; }
 .application-complete .text-link { display: inline-block; margin-top: 12px; }
 

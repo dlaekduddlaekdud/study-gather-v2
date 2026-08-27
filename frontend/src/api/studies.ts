@@ -7,6 +7,9 @@ type GeneratedStudyList = NonNullable<GetOpenStudiesResponse['data']>
 type GeneratedStudySummary = GeneratedStudyList[number]
 type GetStudyResponse = operations['getStudy']['responses'][200]['content']['*/*']
 type GeneratedStudyDetail = NonNullable<GetStudyResponse['data']>
+type CloseStudyResponse =
+  operations['closeStudy']['responses'][200]['content']['*/*']
+type GeneratedClosedStudy = NonNullable<CloseStudyResponse['data']>
 type CreateStudyOperation = operations['createStudy']
 type GeneratedCreateStudyRequest =
   CreateStudyOperation['requestBody']['content']['application/json']
@@ -109,6 +112,19 @@ export async function updateStudy(
 
   if (!isStudyDetail(study)) {
     throw new ApiError('스터디 수정 응답 형식이 올바르지 않습니다.', 500)
+  }
+
+  return study
+}
+
+export async function closeStudy(studyId: number, token: string): Promise<StudyDetail> {
+  const study = await apiRequest<GeneratedClosedStudy>(`/api/studies/${studyId}/close`, {
+    method: 'POST',
+    token,
+  })
+
+  if (!isStudyDetail(study)) {
+    throw new ApiError('스터디 모집 마감 응답 형식이 올바르지 않습니다.', 500)
   }
 
   return study
