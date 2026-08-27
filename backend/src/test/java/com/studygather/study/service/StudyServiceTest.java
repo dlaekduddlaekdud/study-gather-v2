@@ -1,13 +1,16 @@
 package com.studygather.study.service;
 
 import com.studygather.study.dto.request.CreateStudyRequest;
+import com.studygather.study.dto.request.UpdateStudyRequest;
 import com.studygather.study.dto.response.StudyResponse;
 import com.studygather.study.dto.response.StudySummaryResponse;
 import com.studygather.study.entity.Study;
 import com.studygather.study.entity.StudyMember;
 import com.studygather.study.entity.StudyMemberRole;
 import com.studygather.study.entity.StudyStatus;
+import com.studygather.study.exception.StudyClosedException;
 import com.studygather.study.exception.StudyNotFoundException;
+import com.studygather.study.exception.StudyOwnerRequiredException;
 import com.studygather.study.repository.StudyMemberRepository;
 import com.studygather.study.repository.StudyRepository;
 import com.studygather.user.entity.User;
@@ -135,11 +138,91 @@ class StudyServiceTest {
         );
     }
 
+    @Test
+    void updateStudyChangesOnlyRequestedFields() {
+        User owner = saveOwner("study-update-owner@example.com", "study-update-owner");
+        Study study = saveStudy(owner, "수정 전 제목", "유지할 설명");
+        LocalDateTime originalDeadline = study.getRecruitmentDeadline();
+
+        StudyResponse response = studyService.updateStudy(
+                owner.getId(),
+                study.getId(),
+                new UpdateStudyRequest("수정된 제목", null, 6, null)
+        );
+
+        assertEquals("수정된 제목", response.title());
+        assertEquals("유지할 설명", response.description());
+        assertEquals(6, response.capacity());
+        assertEquals(originalDeadline, response.recruitmentDeadline());
+    }
+
+    @Test
+    void updateStudyRejectsNonOwner() {
+        User owner = saveOwner("update-real-owner@example.com", "update-real-owner");
+        User otherUser = saveOwner("update-other-user@example.com", "update-other-user");
+        Study study = saveStudy(owner, "원래 제목", "원래 설명");
+
+        assertThrows(
+                StudyOwnerRequiredException.class,
+                () -> studyService.updateStudy(
+                        otherUser.getId(),
+                        study.getId(),
+                        new UpdateStudyRequest("탈취한 수정", null, null, null)
+                )
+        );
+        assertEquals("원래 제목", study.getTitle());
+    }
+
+    @Test
+    void closeStudyChangesStatusToClosed() {
+        User owner = saveOwner("study-close-owner@example.com", "study-close-owner");
+        Study study = saveStudy(owner, "마감할 스터디", "마감 테스트");
+
+        StudyResponse response = studyService.closeStudy(owner.getId(), study.getId());
+
+        assertEquals(StudyStatus.CLOSED, response.status());
+    }
+
+    @Test
+    void closeStudyRejectsNonOwner() {
+        User owner = saveOwner("close-real-owner@example.com", "close-real-owner");
+        User otherUser = saveOwner("close-other-user@example.com", "close-other-user");
+        Study study = saveStudy(owner, "타인 마감 방지", "권한 테스트");
+
+        assertThrows(
+                StudyOwnerRequiredException.class,
+                () -> studyService.closeStudy(otherUser.getId(), study.getId())
+        );
+        assertEquals(StudyStatus.OPEN, study.getStatus());
+    }
+
+    @Test
+    void closeStudyRejectsAlreadyClosedStudy() {
+        User owner = saveOwner("already-closed-owner@example.com", "already-closed-owner");
+        Study study = saveStudy(owner, "이미 마감된 스터디", "상태 전이 테스트");
+        studyService.closeStudy(owner.getId(), study.getId());
+
+        assertThrows(
+                StudyClosedException.class,
+                () -> studyService.closeStudy(owner.getId(), study.getId())
+        );
+    }
+
     private User saveOwner(String email, String nickname) {
         return userRepository.saveAndFlush(User.create(
                 email,
                 "encoded-password",
                 nickname
+        ));
+    }
+
+    private Study saveStudy(User owner, String title, String description) {
+        return studyRepository.saveAndFlush(Study.create(
+                owner,
+                title,
+                description,
+                5,
+                LocalDateTime.now().plusDays(7).withNano(0)
         ));
     }
 }

@@ -1,5 +1,7 @@
 package com.studygather.study.entity;
 
+import com.studygather.study.exception.StudyCapacityExceededException;
+import com.studygather.study.exception.StudyClosedException;
 import com.studygather.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -136,6 +138,40 @@ public class Study {
 
     public boolean isOwnedBy(Long userId) {
         return userId != null && Objects.equals(owner.getId(), userId);
+    }
+
+    public void update(
+            String title,
+            String description,
+            Integer capacity,
+            LocalDateTime recruitmentDeadline
+    ) {
+        if (title != null) {
+            validateText(title, MAX_TITLE_LENGTH, "제목");
+            this.title = title;
+        }
+        if (description != null) {
+            validateText(description, MAX_DESCRIPTION_LENGTH, "설명");
+            this.description = description;
+        }
+        if (capacity != null) {
+            validateCapacity(capacity);
+            if (capacity < approvedCount) {
+                throw new StudyCapacityExceededException();
+            }
+            this.capacity = capacity;
+        }
+        if (recruitmentDeadline != null) {
+            this.recruitmentDeadline = recruitmentDeadline;
+        }
+    }
+
+    public void close() {
+        if (status == StudyStatus.CLOSED) {
+            throw new StudyClosedException();
+        }
+
+        status = StudyStatus.CLOSED;
     }
 
     public String getTitle() {

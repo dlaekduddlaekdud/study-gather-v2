@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -146,12 +147,97 @@ class StudyControllerIntegrationTest {
                 .andExpect(jsonPath("$.message").value("스터디를 찾을 수 없습니다."));
     }
 
+    @Test
+    void updatesStudyAsOwner() throws Exception {
+        SignUpResponse owner = createUser("update-api-owner@example.com", "update-api-owner");
+        Long studyId = createStudy(owner, "수정 전 스터디");
+        String accessToken = jwtTokenProvider.createAccessToken(owner.id(), UserRole.USER);
+
+        mockMvc.perform(patch("/api/studies/{studyId}", studyId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "수정된 스터디",
+                                  "capacity": 7
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.title").value("수정된 스터디"))
+                .andExpect(jsonPath("$.data.capacity").value(7));
+    }
+
+    @Test
+    void rejectsStudyUpdateByNonOwner() throws Exception {
+        SignUpResponse owner = createUser("update-owner@example.com", "update-owner");
+        SignUpResponse otherUser = createUser("update-other@example.com", "update-other");
+        Long studyId = createStudy(owner, "수정 권한 테스트");
+        String accessToken = jwtTokenProvider.createAccessToken(otherUser.id(), UserRole.USER);
+
+        mockMvc.perform(patch("/api/studies/{studyId}", studyId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "타인의 수정"
+                                }
+                                """))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("스터디 개설자만 수행할 수 있습니다."));
+    }
+
+    @Test
+    void rejectsEmptyStudyUpdate() throws Exception {
+        SignUpResponse owner = createUser("empty-update-owner@example.com", "empty-update-owner");
+        Long studyId = createStudy(owner, "빈 수정 테스트");
+        String accessToken = jwtTokenProvider.createAccessToken(owner.id(), UserRole.USER);
+
+        mockMvc.perform(patch("/api/studies/{studyId}", studyId)
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("수정할 내용을 하나 이상 입력해야 합니다."));
+    }
+
+    @Test
+    void closesStudyAsOwner() throws Exception {
+        SignUpResponse owner = createUser("close-api-owner@example.com", "close-api-owner");
+        Long studyId = createStudy(owner, "마감 API 테스트");
+        String accessToken = jwtTokenProvider.createAccessToken(owner.id(), UserRole.USER);
+
+        mockMvc.perform(post("/api/studies/{studyId}/close", studyId)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("스터디 모집을 마감했습니다."))
+                .andExpect(jsonPath("$.data.status").value("CLOSED"));
+    }
+
+    @Test
+    void rejectsStudyCloseWithoutToken() throws Exception {
+        SignUpResponse owner = createUser("close-no-token-owner@example.com", "close-no-token-owner");
+        Long studyId = createStudy(owner, "미인증 마감 테스트");
+
+        mockMvc.perform(post("/api/studies/{studyId}/close", studyId))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("인증이 필요합니다."));
+    }
+
     private SignUpResponse createUser(String email, String nickname) {
         return userService.signUp(new SignUpRequest(
                 email,
                 "password123",
                 nickname
         ));
+    }
+
+    private Long createStudy(SignUpResponse owner, String title) {
+        return studyService.createStudy(owner.id(), new CreateStudyRequest(
+                title,
+                "스터디 설명입니다.",
+                5,
+                java.time.LocalDateTime.now().plusDays(7).withNano(0)
+        )).id();
     }
 
     private String validRequestBody() {

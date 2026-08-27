@@ -1,12 +1,14 @@
 package com.studygather.study.service;
 
 import com.studygather.study.dto.request.CreateStudyRequest;
+import com.studygather.study.dto.request.UpdateStudyRequest;
 import com.studygather.study.dto.response.StudyResponse;
 import com.studygather.study.dto.response.StudySummaryResponse;
 import com.studygather.study.entity.Study;
 import com.studygather.study.entity.StudyMember;
 import com.studygather.study.entity.StudyStatus;
 import com.studygather.study.exception.StudyNotFoundException;
+import com.studygather.study.exception.StudyOwnerRequiredException;
 import com.studygather.study.repository.StudyMemberRepository;
 import com.studygather.study.repository.StudyRepository;
 import com.studygather.user.entity.User;
@@ -73,5 +75,43 @@ public class StudyService {
                 .orElseThrow(StudyNotFoundException::new);
 
         return StudyResponse.from(study);
+    }
+
+    @Transactional
+    public StudyResponse updateStudy(
+            Long userId,
+            Long studyId,
+            UpdateStudyRequest request
+    ) {
+        Study study = getStudyEntity(studyId);
+        validateOwner(study, userId);
+        study.update(
+                request.title(),
+                request.description(),
+                request.capacity(),
+                request.recruitmentDeadline()
+        );
+
+        return StudyResponse.from(study);
+    }
+
+    @Transactional
+    public StudyResponse closeStudy(Long userId, Long studyId) {
+        Study study = getStudyEntity(studyId);
+        validateOwner(study, userId);
+        study.close();
+
+        return StudyResponse.from(study);
+    }
+
+    private Study getStudyEntity(Long studyId) {
+        return studyRepository.findById(studyId)
+                .orElseThrow(StudyNotFoundException::new);
+    }
+
+    private void validateOwner(Study study, Long userId) {
+        if (!study.isOwnedBy(userId)) {
+            throw new StudyOwnerRequiredException();
+        }
     }
 }
