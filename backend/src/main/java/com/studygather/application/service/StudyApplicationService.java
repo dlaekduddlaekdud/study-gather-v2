@@ -1,14 +1,18 @@
 package com.studygather.application.service;
 
 import com.studygather.application.dto.request.CreateApplicationRequest;
+import com.studygather.application.dto.response.ApplicationListResponse;
 import com.studygather.application.dto.response.ApplicationResponse;
 import com.studygather.application.entity.StudyApplication;
 import com.studygather.application.exception.ApplicationAlreadyExistsException;
+import com.studygather.application.exception.ApplicationApplicantRequiredException;
+import com.studygather.application.exception.ApplicationNotFoundException;
 import com.studygather.application.exception.StudyOwnerCannotApplyException;
 import com.studygather.application.repository.StudyApplicationRepository;
 import com.studygather.study.entity.Study;
 import com.studygather.study.exception.StudyClosedException;
 import com.studygather.study.exception.StudyNotFoundException;
+import com.studygather.study.exception.StudyOwnerRequiredException;
 import com.studygather.study.repository.StudyMemberRepository;
 import com.studygather.study.repository.StudyRepository;
 import com.studygather.user.entity.User;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class StudyApplicationService {
@@ -74,6 +79,48 @@ public class StudyApplicationService {
         } catch (DataIntegrityViolationException exception) {
             // 사전 조회 사이에 들어온 동시 요청은 DB UNIQUE 제약으로 최종 차단한다.
             throw new ApplicationAlreadyExistsException();
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<ApplicationListResponse> getStudyApplications(
+            Long userId,
+            Long studyId
+    ) {
+        Study study = studyRepository.findById(studyId)
+                .orElseThrow(StudyNotFoundException::new);
+        validateStudyOwner(study, userId);
+
+        return applicationRepository.findAllByStudyIdOrderByCreatedAtAsc(studyId)
+                .stream()
+                .map(ApplicationListResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ApplicationListResponse> getMyApplications(Long applicantId) {
+        return applicationRepository.findAllByApplicantIdOrderByCreatedAtDesc(applicantId)
+                .stream()
+                .map(ApplicationListResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public ApplicationResponse cancelApplication(Long userId, Long applicationId) {
+        StudyApplication application = applicationRepository.findById(applicationId)
+                .orElseThrow(ApplicationNotFoundException::new);
+
+        if (!application.isAppliedBy(userId)) {
+            throw new ApplicationApplicantRequiredException();
+        }
+
+        application.cancel();
+        return ApplicationResponse.from(application);
+    }
+
+    private void validateStudyOwner(Study study, Long userId) {
+        if (!study.isOwnedBy(userId)) {
+            throw new StudyOwnerRequiredException();
         }
     }
 }

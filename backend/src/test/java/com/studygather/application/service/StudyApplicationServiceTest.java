@@ -2,12 +2,17 @@ package com.studygather.application.service;
 
 import com.studygather.application.dto.request.CreateApplicationRequest;
 import com.studygather.application.dto.response.ApplicationResponse;
+import com.studygather.application.dto.response.ApplicationListResponse;
 import com.studygather.application.entity.ApplicationStatus;
+import com.studygather.application.exception.ApplicationApplicantRequiredException;
 import com.studygather.application.exception.ApplicationAlreadyExistsException;
+import com.studygather.application.exception.ApplicationNotFoundException;
+import com.studygather.application.exception.InvalidApplicationStatusException;
 import com.studygather.application.exception.StudyOwnerCannotApplyException;
 import com.studygather.study.dto.request.CreateStudyRequest;
 import com.studygather.study.dto.response.StudyResponse;
 import com.studygather.study.exception.StudyClosedException;
+import com.studygather.study.exception.StudyOwnerRequiredException;
 import com.studygather.study.service.StudyService;
 import com.studygather.user.entity.User;
 import com.studygather.user.repository.UserRepository;
@@ -17,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -122,6 +128,130 @@ class StudyApplicationServiceTest {
                         expiredStudy.id(),
                         new CreateApplicationRequest("마감일이 지난 후 신청")
                 )
+        );
+    }
+
+    @Test
+    void getStudyApplicationsReturnsApplicationsToOwner() {
+        TestData testData = createTestData("owner-list");
+        applicationService.createApplication(
+                testData.applicant().getId(),
+                testData.study().id(),
+                new CreateApplicationRequest("목록 조회 신청")
+        );
+
+        List<ApplicationListResponse> response = applicationService.getStudyApplications(
+                testData.study().ownerId(),
+                testData.study().id()
+        );
+
+        assertEquals(1, response.size());
+        assertEquals(testData.applicant().getNickname(), response.get(0).applicantNickname());
+    }
+
+    @Test
+    void getStudyApplicationsRejectsNonOwner() {
+        TestData testData = createTestData("non-owner-list");
+
+        assertThrows(
+                StudyOwnerRequiredException.class,
+                () -> applicationService.getStudyApplications(
+                        testData.applicant().getId(),
+                        testData.study().id()
+                )
+        );
+    }
+
+    @Test
+    void getMyApplicationsReturnsOnlyApplicantsApplications() {
+        TestData firstStudy = createTestData("my-list-first");
+        User secondOwner = saveUser("my-list-second-owner");
+        StudyResponse secondStudy = studyService.createStudy(
+                secondOwner.getId(),
+                new CreateStudyRequest(
+                        "두 번째 신청 스터디",
+                        "내 신청 목록 테스트입니다.",
+                        5,
+                        LocalDateTime.now().plusDays(7).withNano(0)
+                )
+        );
+        applicationService.createApplication(
+                firstStudy.applicant().getId(),
+                firstStudy.study().id(),
+                new CreateApplicationRequest("첫 번째 신청")
+        );
+        applicationService.createApplication(
+                firstStudy.applicant().getId(),
+                secondStudy.id(),
+                new CreateApplicationRequest("두 번째 신청")
+        );
+
+        List<ApplicationListResponse> response = applicationService.getMyApplications(
+                firstStudy.applicant().getId()
+        );
+
+        assertEquals(2, response.size());
+        assertEquals(secondStudy.id(), response.get(0).studyId());
+        assertEquals(firstStudy.study().id(), response.get(1).studyId());
+    }
+
+    @Test
+    void cancelApplicationChangesPendingStatusToCanceled() {
+        TestData testData = createTestData("cancel-service");
+        ApplicationResponse application = applicationService.createApplication(
+                testData.applicant().getId(),
+                testData.study().id(),
+                new CreateApplicationRequest("취소할 신청")
+        );
+
+        ApplicationResponse response = applicationService.cancelApplication(
+                testData.applicant().getId(),
+                application.id()
+        );
+
+        assertEquals(ApplicationStatus.CANCELED, response.status());
+    }
+
+    @Test
+    void cancelApplicationRejectsOtherUser() {
+        TestData testData = createTestData("cancel-other-user");
+        User otherUser = saveUser("cancel-unrelated-user");
+        ApplicationResponse application = applicationService.createApplication(
+                testData.applicant().getId(),
+                testData.study().id(),
+                new CreateApplicationRequest("본인만 취소 가능")
+        );
+
+        assertThrows(
+                ApplicationApplicantRequiredException.class,
+                () -> applicationService.cancelApplication(otherUser.getId(), application.id())
+        );
+    }
+
+    @Test
+    void cancelApplicationRejectsAlreadyCanceledApplication() {
+        TestData testData = createTestData("cancel-twice");
+        ApplicationResponse application = applicationService.createApplication(
+                testData.applicant().getId(),
+                testData.study().id(),
+                new CreateApplicationRequest("두 번 취소할 수 없음")
+        );
+        applicationService.cancelApplication(testData.applicant().getId(), application.id());
+
+        assertThrows(
+                InvalidApplicationStatusException.class,
+                () -> applicationService.cancelApplication(
+                        testData.applicant().getId(),
+                        application.id()
+                )
+        );
+    }
+
+    @Test
+    void cancelApplicationRejectsUnknownApplication() {
+        assertThrows(
+                ApplicationNotFoundException.class,
+                () -> applicationService.cancelApplication(1L, Long.MAX_VALUE)
         );
     }
 

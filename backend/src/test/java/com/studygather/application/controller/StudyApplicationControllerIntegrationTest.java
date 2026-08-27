@@ -1,5 +1,6 @@
 package com.studygather.application.controller;
 
+import com.jayway.jsonpath.JsonPath;
 import com.studygather.auth.jwt.JwtTokenProvider;
 import com.studygather.study.dto.request.CreateStudyRequest;
 import com.studygather.study.dto.response.StudyResponse;
@@ -14,10 +15,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -129,6 +132,54 @@ class StudyApplicationControllerIntegrationTest {
                         .value("이미 해당 스터디에 신청했거나 참여 중입니다."));
     }
 
+    @Test
+    void ownerGetsStudyApplications() throws Exception {
+        SignUpResponse owner = createUser("owner-list-api@example.com", "owner-list-api");
+        SignUpResponse applicant = createUser(
+                "owner-list-applicant@example.com",
+                "owner-list-applicant"
+        );
+        StudyResponse study = createStudy(owner, "개설자 신청 목록 테스트");
+        createApplication(study.id(), applicant);
+        String ownerToken = jwtTokenProvider.createAccessToken(owner.id(), UserRole.USER);
+
+        mockMvc.perform(get("/api/studies/{studyId}/applications", study.id())
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].applicantId").value(applicant.id()))
+                .andExpect(jsonPath("$.data[0].applicantNickname")
+                        .value(applicant.nickname()));
+    }
+
+    @Test
+    void applicantGetsAndCancelsOwnApplication() throws Exception {
+        SignUpResponse owner = createUser("cancel-api-owner@example.com", "cancel-api-owner");
+        SignUpResponse applicant = createUser(
+                "cancel-api-applicant@example.com",
+                "cancel-api-applicant"
+        );
+        StudyResponse study = createStudy(owner, "신청 취소 API 테스트");
+        Long applicationId = createApplication(study.id(), applicant);
+        String applicantToken = jwtTokenProvider.createAccessToken(applicant.id(), UserRole.USER);
+
+        mockMvc.perform(get("/api/applications/me")
+                        .header("Authorization", "Bearer " + applicantToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").value(applicationId))
+                .andExpect(jsonPath("$.data[0].studyTitle").value("신청 취소 API 테스트"));
+
+        mockMvc.perform(post("/api/applications/{applicationId}/cancel", applicationId)
+                        .header("Authorization", "Bearer " + applicantToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("CANCELED"));
+
+        mockMvc.perform(post("/api/applications/{applicationId}/cancel", applicationId)
+                        .header("Authorization", "Bearer " + applicantToken))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message")
+                        .value("현재 상태에서는 참여 신청을 변경할 수 없습니다."));
+    }
+
     private SignUpResponse createUser(String email, String nickname) {
         return userService.signUp(new SignUpRequest(email, "password123", nickname));
     }
@@ -140,5 +191,25 @@ class StudyApplicationControllerIntegrationTest {
                 5,
                 LocalDateTime.now().plusDays(7).withNano(0)
         ));
+    }
+
+    private Long createApplication(Long studyId, SignUpResponse applicant) throws Exception {
+        String applicantToken = jwtTokenProvider.createAccessToken(applicant.id(), UserRole.USER);
+        MvcResult result = mockMvc.perform(post("/api/studies/{studyId}/applications", studyId)
+                        .header("Authorization", "Bearer " + applicantToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "message": "목록 및 취소 테스트 신청입니다."
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        Number applicationId = JsonPath.read(
+                result.getResponse().getContentAsString(),
+                "$.data.id"
+        );
+        return applicationId.longValue();
     }
 }

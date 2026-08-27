@@ -1,6 +1,9 @@
 package com.studygather.common.exception;
 
 import com.studygather.application.exception.ApplicationAlreadyExistsException;
+import com.studygather.application.exception.ApplicationApplicantRequiredException;
+import com.studygather.application.exception.ApplicationNotFoundException;
+import com.studygather.application.exception.InvalidApplicationStatusException;
 import com.studygather.application.exception.StudyOwnerCannotApplyException;
 import com.studygather.auth.exception.InvalidCredentialsException;
 import com.studygather.common.api.ApiResponse;
@@ -20,6 +23,33 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ApplicationNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleApplicationNotFound(
+            ApplicationNotFoundException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
+
+    @ExceptionHandler(ApplicationApplicantRequiredException.class)
+    public ResponseEntity<ApiResponse<Void>> handleApplicationApplicantRequired(
+            ApplicationApplicantRequiredException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidApplicationStatusException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidApplicationStatus(
+            InvalidApplicationStatusException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
 
     @ExceptionHandler(ApplicationAlreadyExistsException.class)
     public ResponseEntity<ApiResponse<Void>> handleApplicationAlreadyExists(

@@ -1,5 +1,6 @@
 package com.studygather.application.entity;
 
+import com.studygather.application.exception.InvalidApplicationStatusException;
 import com.studygather.study.entity.Study;
 import com.studygather.user.entity.User;
 import jakarta.persistence.Column;
@@ -118,6 +119,18 @@ public class StudyApplication {
 
     public ApplicationStatus getStatus() {
         return status;
+    }
+
+    public boolean isAppliedBy(Long userId) {
+        return userId != null && Objects.equals(applicant.getId(), userId);
+    }
+
+    public void cancel() {
+        if (status != ApplicationStatus.PENDING) {
+            throw new InvalidApplicationStatusException();
+        }
+
+        status = ApplicationStatus.CANCELED;
     }
 
     public LocalDateTime getDecidedAt() {
