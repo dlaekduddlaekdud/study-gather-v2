@@ -139,7 +139,12 @@ export function StudyDetailPage() {
                 </div>
               ) : null}
               {user?.id === study.ownerId ? (
-                <div className="application-notice"><p>내가 운영하는 스터디입니다.</p></div>
+                <div className="application-notice">
+                  <p>내가 운영하는 스터디입니다.</p>
+                  <Link className="text-link" to={`/studies/${study.id}/applications`}>
+                    받은 신청 관리하기
+                  </Link>
+                </div>
               ) : null}
               {user && user.id !== study.ownerId && study.status !== 'OPEN' ? (
                 <div className="application-notice"><p>모집이 마감되어 신청할 수 없습니다.</p></div>

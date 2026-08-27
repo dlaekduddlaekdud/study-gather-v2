@@ -27,7 +27,7 @@ export type ApplicationResult = Required<
 
 function parseApplicationListItem(application: unknown): ApplicationListItem {
   if (typeof application !== 'object' || application === null) {
-    throw new ApiError('내 참여 신청 목록 응답 형식이 올바르지 않습니다.', 500)
+    throw new ApiError('참여 신청 목록 응답 형식이 올바르지 않습니다.', 500)
   }
   const candidate = application as Record<string, unknown>
 
@@ -47,7 +47,7 @@ function parseApplicationListItem(application: unknown): ApplicationListItem {
   )
 
   if (!isValid) {
-    throw new ApiError('내 참여 신청 목록 응답 형식이 올바르지 않습니다.', 500)
+    throw new ApiError('참여 신청 목록 응답 형식이 올바르지 않습니다.', 500)
   }
 
   return {
@@ -132,4 +132,38 @@ export async function cancelApplication(
   )
 
   return parseApplicationResult(application)
+}
+
+export async function getStudyApplications(
+  studyId: number,
+  token: string,
+  signal?: AbortSignal,
+): Promise<ApplicationListItem[]> {
+  const applications = await apiRequest<GeneratedApplicationList>(
+    `/api/studies/${studyId}/applications`,
+    { token, signal },
+  )
+
+  return applications.map(parseApplicationListItem)
+}
+
+async function decideApplication(
+  applicationId: number,
+  decision: 'approve' | 'reject',
+  token: string,
+): Promise<ApplicationResult> {
+  const application = await apiRequest<GeneratedApplicationResponse>(
+    `/api/applications/${applicationId}/${decision}`,
+    { method: 'POST', token },
+  )
+
+  return parseApplicationResult(application)
+}
+
+export function approveApplication(applicationId: number, token: string) {
+  return decideApplication(applicationId, 'approve', token)
+}
+
+export function rejectApplication(applicationId: number, token: string) {
+  return decideApplication(applicationId, 'reject', token)
 }

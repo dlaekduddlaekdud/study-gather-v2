@@ -4,22 +4,15 @@ import {
   cancelApplication,
   getMyApplications,
   type ApplicationListItem,
-  type ApplicationStatus,
 } from '../api/applications'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
+import { ApplicationStatusBadge } from '../components/ApplicationStatusBadge'
 
 type ApplicationsState =
   | { status: 'loading' }
   | { status: 'success'; applications: ApplicationListItem[] }
   | { status: 'error'; message: string }
-
-const statusLabels: Record<ApplicationStatus, string> = {
-  PENDING: '승인 대기',
-  APPROVED: '승인 완료',
-  REJECTED: '승인 거절',
-  CANCELED: '신청 취소',
-}
 
 const dateFormatter = new Intl.DateTimeFormat('ko-KR', {
   year: 'numeric',
@@ -125,9 +118,7 @@ export function MyApplicationsPage() {
           {state.applications.map((application) => (
             <article className="application-card" key={application.id}>
               <div className="application-card__heading">
-                <span className={`application-status application-status--${application.status.toLowerCase()}`}>
-                  {statusLabels[application.status]}
-                </span>
+                <ApplicationStatusBadge status={application.status} />
                 <span>신청 #{application.id}</span>
               </div>
               <h2><Link to={`/studies/${application.studyId}`}>{application.studyTitle}</Link></h2>
