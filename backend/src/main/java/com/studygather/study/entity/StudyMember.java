@@ -67,6 +67,13 @@ public class StudyMember {
         return new StudyMember(study, owner, StudyMemberRole.OWNER);
     }
 
+    public static StudyMember createMember(Study study, User user) {
+        Objects.requireNonNull(study, "스터디는 필수입니다.");
+        Objects.requireNonNull(user, "사용자는 필수입니다.");
+
+        return new StudyMember(study, user, StudyMemberRole.MEMBER);
+    }
+
     @PrePersist
     private void prePersist() {
         joinedAt = LocalDateTime.now();

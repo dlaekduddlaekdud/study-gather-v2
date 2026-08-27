@@ -161,7 +161,9 @@ public class Study {
         if (capacity != null) {
             validateCapacity(capacity);
             if (capacity < approvedCount) {
-                throw new StudyCapacityExceededException();
+                throw new StudyCapacityExceededException(
+                        "현재 승인 인원보다 정원을 작게 설정할 수 없습니다."
+                );
             }
             this.capacity = capacity;
         }
@@ -176,6 +178,17 @@ public class Study {
         }
 
         status = StudyStatus.CLOSED;
+    }
+
+    public void increaseApprovedCount() {
+        validateCapacityAvailable();
+        approvedCount++;
+    }
+
+    public void validateCapacityAvailable() {
+        if (approvedCount >= capacity) {
+            throw new StudyCapacityExceededException();
+        }
     }
 
     public String getTitle() {

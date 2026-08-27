@@ -45,4 +45,30 @@ public class ApplicationController {
 
         return ResponseEntity.ok(ApiResponse.success("참여 신청을 취소했습니다.", response));
     }
+
+    @PostMapping("/{applicationId}/approve")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> approveApplication(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long applicationId
+    ) {
+        ApplicationResponse response = applicationService.approveApplication(
+                userId,
+                applicationId
+        );
+
+        return ResponseEntity.ok(ApiResponse.success("참여 신청을 승인했습니다.", response));
+    }
+
+    @PostMapping("/{applicationId}/reject")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> rejectApplication(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long applicationId
+    ) {
+        ApplicationResponse response = applicationService.rejectApplication(
+                userId,
+                applicationId
+        );
+
+        return ResponseEntity.ok(ApiResponse.success("참여 신청을 거절했습니다.", response));
+    }
 }

@@ -9,10 +9,16 @@ import com.studygather.application.exception.ApplicationAlreadyExistsException;
 import com.studygather.application.exception.ApplicationNotFoundException;
 import com.studygather.application.exception.InvalidApplicationStatusException;
 import com.studygather.application.exception.StudyOwnerCannotApplyException;
+import com.studygather.application.repository.StudyApplicationRepository;
+import com.studygather.study.entity.StudyMember;
+import com.studygather.study.entity.StudyMemberRole;
 import com.studygather.study.dto.request.CreateStudyRequest;
 import com.studygather.study.dto.response.StudyResponse;
+import com.studygather.study.exception.StudyCapacityExceededException;
 import com.studygather.study.exception.StudyClosedException;
 import com.studygather.study.exception.StudyOwnerRequiredException;
+import com.studygather.study.repository.StudyMemberRepository;
+import com.studygather.study.repository.StudyRepository;
 import com.studygather.study.service.StudyService;
 import com.studygather.user.entity.User;
 import com.studygather.user.repository.UserRepository;
@@ -40,6 +46,15 @@ class StudyApplicationServiceTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private StudyApplicationRepository applicationRepository;
+
+    @Autowired
+    private StudyRepository studyRepository;
+
+    @Autowired
+    private StudyMemberRepository studyMemberRepository;
 
     @Test
     void createApplicationSavesPendingApplication() {
@@ -252,6 +267,128 @@ class StudyApplicationServiceTest {
         assertThrows(
                 ApplicationNotFoundException.class,
                 () -> applicationService.cancelApplication(1L, Long.MAX_VALUE)
+        );
+    }
+
+    @Test
+    void approveApplicationCreatesMemberAndIncreasesApprovedCount() {
+        TestData testData = createTestData("approve-service");
+        ApplicationResponse application = createApplication(testData, "승인할 신청");
+
+        ApplicationResponse response = applicationService.approveApplication(
+                testData.study().ownerId(),
+                application.id()
+        );
+
+        StudyMember member = studyMemberRepository.findByStudyIdAndUserId(
+                        testData.study().id(),
+                        testData.applicant().getId()
+                )
+                .orElseThrow();
+        int approvedCount = studyRepository.findById(testData.study().id())
+                .orElseThrow()
+                .getApprovedCount();
+
+        assertEquals(ApplicationStatus.APPROVED, response.status());
+        assertNotNull(response.decidedAt());
+        assertEquals(StudyMemberRole.MEMBER, member.getMemberRole());
+        assertEquals(2, approvedCount);
+    }
+
+    @Test
+    void rejectApplicationChangesStatusWithoutCreatingMember() {
+        TestData testData = createTestData("reject-service");
+        ApplicationResponse application = createApplication(testData, "거절할 신청");
+
+        ApplicationResponse response = applicationService.rejectApplication(
+                testData.study().ownerId(),
+                application.id()
+        );
+
+        assertEquals(ApplicationStatus.REJECTED, response.status());
+        assertNotNull(response.decidedAt());
+        assertEquals(
+                1,
+                studyRepository.findById(testData.study().id()).orElseThrow().getApprovedCount()
+        );
+        assertEquals(
+                false,
+                studyMemberRepository.existsByStudyIdAndUserId(
+                        testData.study().id(),
+                        testData.applicant().getId()
+                )
+        );
+    }
+
+    @Test
+    void approveApplicationRejectsNonOwner() {
+        TestData testData = createTestData("approve-non-owner");
+        User otherUser = saveUser("approve-unrelated-user");
+        ApplicationResponse application = createApplication(testData, "권한 없는 승인");
+
+        assertThrows(
+                StudyOwnerRequiredException.class,
+                () -> applicationService.approveApplication(otherUser.getId(), application.id())
+        );
+    }
+
+    @Test
+    void approveApplicationRejectsWhenCapacityIsFull() {
+        User owner = saveUser("capacity-owner");
+        User firstApplicant = saveUser("capacity-first-applicant");
+        User secondApplicant = saveUser("capacity-second-applicant");
+        StudyResponse study = studyService.createStudy(owner.getId(), new CreateStudyRequest(
+                "정원 검증 스터디",
+                "승인 정원 검증 테스트입니다.",
+                2,
+                LocalDateTime.now().plusDays(7).withNano(0)
+        ));
+        ApplicationResponse firstApplication = applicationService.createApplication(
+                firstApplicant.getId(),
+                study.id(),
+                new CreateApplicationRequest("첫 번째 신청")
+        );
+        ApplicationResponse secondApplication = applicationService.createApplication(
+                secondApplicant.getId(),
+                study.id(),
+                new CreateApplicationRequest("두 번째 신청")
+        );
+        applicationService.approveApplication(owner.getId(), firstApplication.id());
+
+        assertThrows(
+                StudyCapacityExceededException.class,
+                () -> applicationService.approveApplication(owner.getId(), secondApplication.id())
+        );
+        assertEquals(
+                ApplicationStatus.PENDING,
+                applicationRepository.findById(secondApplication.id()).orElseThrow().getStatus()
+        );
+        assertEquals(
+                false,
+                studyMemberRepository.existsByStudyIdAndUserId(study.id(), secondApplicant.getId())
+        );
+    }
+
+    @Test
+    void rejectApplicationRejectsAlreadyDecidedApplication() {
+        TestData testData = createTestData("reject-decided");
+        ApplicationResponse application = createApplication(testData, "한 번만 결정 가능");
+        applicationService.rejectApplication(testData.study().ownerId(), application.id());
+
+        assertThrows(
+                InvalidApplicationStatusException.class,
+                () -> applicationService.rejectApplication(
+                        testData.study().ownerId(),
+                        application.id()
+                )
+        );
+    }
+
+    private ApplicationResponse createApplication(TestData testData, String message) {
+        return applicationService.createApplication(
+                testData.applicant().getId(),
+                testData.study().id(),
+                new CreateApplicationRequest(message)
         );
     }
 

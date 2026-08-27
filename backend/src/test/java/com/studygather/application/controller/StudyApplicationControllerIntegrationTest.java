@@ -180,6 +180,62 @@ class StudyApplicationControllerIntegrationTest {
                         .value("현재 상태에서는 참여 신청을 변경할 수 없습니다."));
     }
 
+    @Test
+    void ownerApprovesAndRejectsApplications() throws Exception {
+        SignUpResponse owner = createUser("decision-api-owner@example.com", "decision-owner");
+        SignUpResponse approvedApplicant = createUser(
+                "decision-api-approved@example.com",
+                "approved-applicant"
+        );
+        SignUpResponse rejectedApplicant = createUser(
+                "decision-api-rejected@example.com",
+                "rejected-applicant"
+        );
+        StudyResponse study = createStudy(owner, "신청 결정 API 테스트");
+        Long approvedApplicationId = createApplication(study.id(), approvedApplicant);
+        Long rejectedApplicationId = createApplication(study.id(), rejectedApplicant);
+        String ownerToken = jwtTokenProvider.createAccessToken(owner.id(), UserRole.USER);
+
+        mockMvc.perform(post("/api/applications/{applicationId}/approve", approvedApplicationId)
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("참여 신청을 승인했습니다."))
+                .andExpect(jsonPath("$.data.status").value("APPROVED"))
+                .andExpect(jsonPath("$.data.decidedAt").isNotEmpty());
+
+        mockMvc.perform(post("/api/applications/{applicationId}/reject", rejectedApplicationId)
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("참여 신청을 거절했습니다."))
+                .andExpect(jsonPath("$.data.status").value("REJECTED"))
+                .andExpect(jsonPath("$.data.decidedAt").isNotEmpty());
+    }
+
+    @Test
+    void rejectsDecisionFromNonOwner() throws Exception {
+        SignUpResponse owner = createUser(
+                "decision-non-owner-study-owner@example.com",
+                "study-owner"
+        );
+        SignUpResponse applicant = createUser(
+                "decision-non-owner-applicant@example.com",
+                "decision-applicant"
+        );
+        SignUpResponse otherUser = createUser(
+                "decision-non-owner-user@example.com",
+                "decision-other-user"
+        );
+        StudyResponse study = createStudy(owner, "신청 결정 권한 테스트");
+        Long applicationId = createApplication(study.id(), applicant);
+        String otherUserToken = jwtTokenProvider.createAccessToken(otherUser.id(), UserRole.USER);
+
+        mockMvc.perform(post("/api/applications/{applicationId}/approve", applicationId)
+                        .header("Authorization", "Bearer " + otherUserToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message")
+                        .value("스터디 개설자만 수행할 수 있습니다."));
+    }
+
     private SignUpResponse createUser(String email, String nickname) {
         return userService.signUp(new SignUpRequest(email, "password123", nickname));
     }

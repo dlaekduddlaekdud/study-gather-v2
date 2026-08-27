@@ -126,11 +126,26 @@ public class StudyApplication {
     }
 
     public void cancel() {
+        validatePending();
+        status = ApplicationStatus.CANCELED;
+    }
+
+    public void approve() {
+        validatePending();
+        status = ApplicationStatus.APPROVED;
+        decidedAt = LocalDateTime.now();
+    }
+
+    public void reject() {
+        validatePending();
+        status = ApplicationStatus.REJECTED;
+        decidedAt = LocalDateTime.now();
+    }
+
+    public void validatePending() {
         if (status != ApplicationStatus.PENDING) {
             throw new InvalidApplicationStatusException();
         }
-
-        status = ApplicationStatus.CANCELED;
     }
 
     public LocalDateTime getDecidedAt() {

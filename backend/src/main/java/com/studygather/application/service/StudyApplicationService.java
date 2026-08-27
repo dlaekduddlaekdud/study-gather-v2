@@ -10,6 +10,7 @@ import com.studygather.application.exception.ApplicationNotFoundException;
 import com.studygather.application.exception.StudyOwnerCannotApplyException;
 import com.studygather.application.repository.StudyApplicationRepository;
 import com.studygather.study.entity.Study;
+import com.studygather.study.entity.StudyMember;
 import com.studygather.study.exception.StudyClosedException;
 import com.studygather.study.exception.StudyNotFoundException;
 import com.studygather.study.exception.StudyOwnerRequiredException;
@@ -116,6 +117,40 @@ public class StudyApplicationService {
 
         application.cancel();
         return ApplicationResponse.from(application);
+    }
+
+    @Transactional
+    public ApplicationResponse approveApplication(Long userId, Long applicationId) {
+        StudyApplication application = findApplicationForUpdate(applicationId);
+        application.validatePending();
+
+        // 잠금 전에 Study를 조회하면 영속성 컨텍스트에 오래된 정원 값이 남을 수 있다.
+        Study lockedStudy = studyRepository.findByIdForUpdate(application.getStudy().getId())
+                .orElseThrow(StudyNotFoundException::new);
+
+        validateStudyOwner(lockedStudy, userId);
+        lockedStudy.validateCapacityAvailable();
+        application.approve();
+        StudyMember member = StudyMember.createMember(lockedStudy, application.getApplicant());
+        studyMemberRepository.saveAndFlush(member);
+        lockedStudy.increaseApprovedCount();
+
+        return ApplicationResponse.from(application);
+    }
+
+    @Transactional
+    public ApplicationResponse rejectApplication(Long userId, Long applicationId) {
+        StudyApplication application = findApplicationForUpdate(applicationId);
+        application.validatePending();
+        validateStudyOwner(application.getStudy(), userId);
+
+        application.reject();
+        return ApplicationResponse.from(application);
+    }
+
+    private StudyApplication findApplicationForUpdate(Long applicationId) {
+        return applicationRepository.findByIdForUpdate(applicationId)
+                .orElseThrow(ApplicationNotFoundException::new);
     }
 
     private void validateStudyOwner(Study study, Long userId) {
