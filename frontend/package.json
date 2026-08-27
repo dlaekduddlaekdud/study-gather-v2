@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "openapi:download": "curl --fail --silent --show-error http://localhost:8080/v3/api-docs --output ../docs/openapi.json",
+    "openapi:generate": "npm run openapi:download && openapi-typescript ../docs/openapi.json -o src/api/generated/schema.ts",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -19,8 +21,9 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
+    "openapi-typescript": "^7.13.0",
     "oxlint": "^1.79.0",
-    "typescript": "~6.0.2",
+    "typescript": "~5.9.3",
     "vite": "^8.2.2"
   }
 }
