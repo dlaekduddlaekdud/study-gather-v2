@@ -8,6 +8,7 @@ import { tokenStorage } from './tokenStorage'
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [initialToken] = useState(() => tokenStorage.get())
+  const [accessToken, setAccessToken] = useState(initialToken)
   const [isRestoring, setIsRestoring] = useState(initialToken !== null)
 
   useEffect(() => {
@@ -19,7 +20,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isActive) setUser(restoredUser)
       })
       .catch((error: unknown) => {
-        if (error instanceof ApiError && error.status === 401) tokenStorage.remove()
+        if (error instanceof ApiError && error.status === 401) {
+          tokenStorage.remove()
+          setAccessToken(null)
+        }
       })
       .finally(() => {
         if (isActive) setIsRestoring(false)
@@ -35,20 +39,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     tokenStorage.set(accessToken)
     try {
       setUser(await getMyInfo(accessToken))
+      setAccessToken(accessToken)
     } catch (error) {
       tokenStorage.remove()
+      setAccessToken(null)
       throw error
     }
   }, [])
 
   const logout = useCallback(() => {
     tokenStorage.remove()
+    setAccessToken(null)
     setUser(null)
   }, [])
 
   const value = useMemo(
-    () => ({ user, isRestoring, login, logout }),
-    [user, isRestoring, login, logout],
+    () => ({ user, accessToken, isRestoring, login, logout }),
+    [user, accessToken, isRestoring, login, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

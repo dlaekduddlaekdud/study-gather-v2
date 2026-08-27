@@ -111,6 +111,23 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .study-detail-summary dt { color: var(--muted); font-size: 12px; }
 .study-detail-summary dd { margin: 0; font-size: 14px; font-weight: 700; }
 
+.study-create-page { width: min(100% - 48px, 980px); margin: 0 auto; padding: 64px 0 80px; }
+.study-create-intro { max-width: 680px; margin-bottom: 32px; }
+.study-create-intro h1 { margin: 10px 0 13px; color: var(--navy); font-size: clamp(34px, 5vw, 52px); line-height: 1.15; letter-spacing: -2.8px; }
+.study-create-intro > p:last-child { margin: 0; color: var(--muted); line-height: 1.7; }
+.study-create-form { padding: clamp(28px, 5vw, 48px); background: white; border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 20px 60px rgba(29,48,93,.08); }
+.study-create-field { min-width: 0; display: flex; flex-direction: column; }
+.study-create-field + .study-create-field { margin-top: 24px; }
+.study-create-field label { margin-bottom: 9px; font-size: 14px; font-weight: 800; }
+.study-create-field input, .study-create-field textarea { width: 100%; padding: 13px 14px; color: var(--navy); background: #fbfcfe; border: 1px solid #dce1eb; border-radius: 9px; outline: none; font: inherit; }
+.study-create-field input { height: 48px; }
+.study-create-field textarea { resize: vertical; line-height: 1.65; }
+.study-create-field input:focus, .study-create-field textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(49,87,213,.1); }
+.study-create-field > span { margin-top: 7px; color: var(--muted); font-size: 12px; text-align: right; }
+.study-create-row { margin-top: 24px; display: grid; grid-template-columns: minmax(180px, .65fr) minmax(280px, 1.35fr); gap: 18px; }
+.study-create-row .study-create-field { margin-top: 0; }
+.study-create-form > .submit-button { width: auto; min-width: 180px; margin-left: auto; display: flex; }
+
 @keyframes study-loading-spin {
   to { transform: rotate(360deg); }
 }
@@ -126,6 +143,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .auth-intro h1 { font-size: 42px; letter-spacing: -2px; }
   .profile-page { grid-template-columns: 1fr; gap: 40px; padding: 52px 20px; }
   .study-detail-content { grid-template-columns: 1fr; }
+  .study-create-row { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
@@ -137,4 +155,6 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .study-grid { grid-template-columns: 1fr; }
   .study-detail-page { width: min(100% - 40px, 1080px); padding: 36px 0 64px; }
   .study-state__actions { flex-direction: column; }
+  .study-create-page { width: min(100% - 40px, 980px); padding: 44px 0 64px; }
+  .study-create-form > .submit-button { width: 100%; }
 }

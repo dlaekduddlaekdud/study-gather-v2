@@ -22,6 +22,7 @@ export function AppLayout() {
           <NavLink to="/studies">스터디 찾기</NavLink>
           {user ? (
             <>
+              <NavLink to="/studies/new">스터디 만들기</NavLink>
               <NavLink to="/me">내 정보</NavLink>
               <button className="nav-button" type="button" onClick={handleLogout}>로그아웃</button>
             </>

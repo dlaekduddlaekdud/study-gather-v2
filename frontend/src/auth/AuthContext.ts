@@ -3,6 +3,7 @@ import type { LoginRequest, User } from '../api/types'
 
 export interface AuthContextValue {
   user: User | null
+  accessToken: string | null
   isRestoring: boolean
   login: (request: LoginRequest) => Promise<void>
   logout: () => void
