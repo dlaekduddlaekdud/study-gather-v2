@@ -19,6 +19,7 @@ export function AppLayout() {
         </Link>
         <nav className="main-nav" aria-label="주요 메뉴">
           <NavLink to="/">홈</NavLink>
+          <NavLink to="/studies">스터디 찾기</NavLink>
           {user ? (
             <>
               <NavLink to="/me">내 정보</NavLink>

@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MyPage } from './pages/MyPage'
 import { SignUpPage } from './pages/SignUpPage'
+import { StudyListPage } from './pages/StudyListPage'
 import './App.css'
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route index element={<HomePage />} />
+        <Route path="studies" element={<StudyListPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignUpPage />} />
         <Route element={<ProtectedRoute />}>

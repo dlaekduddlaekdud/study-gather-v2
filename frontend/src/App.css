@@ -61,6 +61,36 @@
 
 button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid rgba(49,87,213,.35); outline-offset: 3px; }
 
+.study-list-page { width: min(100% - 48px, 1080px); margin: 0 auto; padding: 72px 0 80px; }
+.study-list-header { max-width: 660px; margin-bottom: 36px; }
+.study-list-header h1 { margin: 8px 0 13px; color: var(--navy); font-size: clamp(34px, 5vw, 52px); line-height: 1.12; letter-spacing: -2.8px; }
+.study-list-header > p:last-child { margin: 0; color: var(--muted); font-size: 16px; }
+.study-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.study-card { min-height: 270px; padding: 24px; display: flex; flex-direction: column; background: white; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 15px 45px rgba(29,48,93,.07); }
+.study-card__heading, .study-card__capacity { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.study-card__badge { padding: 6px 10px; color: var(--blue-dark); background: #eaf0ff; border-radius: 999px; font-size: 12px; font-weight: 800; }
+.study-card__id { color: #9aa2b2; font-size: 13px; }
+.study-card h2 { margin: 20px 0 23px; font-size: 22px; line-height: 1.35; letter-spacing: -.7px; }
+.study-card__details { margin: 0 0 22px; display: grid; gap: 13px; }
+.study-card__details div { display: flex; justify-content: space-between; gap: 16px; }
+.study-card__details dt { color: var(--muted); font-size: 13px; }
+.study-card__details dd { margin: 0; font-size: 14px; font-weight: 700; text-align: right; }
+.study-card__capacity { margin-top: auto; color: var(--blue-dark); font-size: 13px; font-weight: 800; }
+.study-card__capacity progress { width: 58%; height: 7px; overflow: hidden; border: 0; border-radius: 999px; background: #eaf0ff; }
+.study-card__capacity progress::-webkit-progress-bar { border-radius: 999px; background: #eaf0ff; }
+.study-card__capacity progress::-webkit-progress-value { border-radius: 999px; background: var(--blue); }
+.study-card__capacity progress::-moz-progress-bar { border-radius: 999px; background: var(--blue); }
+.study-state { min-height: 260px; padding: 32px; display: grid; place-items: center; align-content: center; gap: 13px; text-align: center; background: white; border: 1px solid var(--line); border-radius: 18px; }
+.study-state h2, .study-state p { margin: 0; }
+.study-state p { color: var(--muted); }
+.study-state--error { border-color: rgba(184,77,77,.22); }
+.study-state .primary-button { margin-top: 8px; }
+.study-loading { width: 34px; height: 34px; border: 3px solid #dce5ff; border-top-color: var(--blue); border-radius: 50%; animation: study-loading-spin .8s linear infinite; }
+
+@keyframes study-loading-spin {
+  to { transform: rotate(360deg); }
+}
+
 @media (max-width: 820px) {
   .site-header { padding: 0 20px; }
   .brand > span:last-child { display: none; }
@@ -78,4 +108,6 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .hero-section > h1 { font-size: 42px; letter-spacing: -2.5px; }
   .hero-actions { align-items: flex-start; flex-direction: column; }
   .auth-card, .profile-card { padding: 26px 20px; }
+  .study-list-page { width: min(100% - 40px, 1080px); padding: 52px 0 64px; }
+  .study-grid { grid-template-columns: 1fr; }
 }
