@@ -1,6 +1,9 @@
 package com.studygather.study.controller;
 
 import com.jayway.jsonpath.JsonPath;
+import com.studygather.application.dto.request.CreateApplicationRequest;
+import com.studygather.application.dto.response.ApplicationResponse;
+import com.studygather.application.service.StudyApplicationService;
 import com.studygather.auth.jwt.JwtTokenProvider;
 import com.studygather.study.dto.request.CreateStudyRequest;
 import com.studygather.study.entity.StudyMemberRole;
@@ -45,6 +48,9 @@ class StudyControllerIntegrationTest {
 
     @Autowired
     private StudyService studyService;
+
+    @Autowired
+    private StudyApplicationService applicationService;
 
     @Test
     void createsStudyWithLoginToken() throws Exception {
@@ -219,6 +225,67 @@ class StudyControllerIntegrationTest {
         Long studyId = createStudy(owner, "미인증 마감 테스트");
 
         mockMvc.perform(post("/api/studies/{studyId}/close", studyId))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("인증이 필요합니다."));
+    }
+
+    @Test
+    void ownerGetsOwnerAndApprovedMemberList() throws Exception {
+        SignUpResponse owner = createUser("member-api-owner@example.com", "member-api-owner");
+        SignUpResponse applicant = createUser(
+                "member-api-applicant@example.com",
+                "member-api-applicant"
+        );
+        Long studyId = createStudy(owner, "멤버 목록 API 테스트");
+        ApplicationResponse application = applicationService.createApplication(
+                applicant.id(),
+                studyId,
+                new CreateApplicationRequest("멤버 목록에 들어갈 신청")
+        );
+        applicationService.approveApplication(owner.id(), application.id());
+        String ownerToken = jwtTokenProvider.createAccessToken(owner.id(), UserRole.USER);
+
+        mockMvc.perform(get("/api/studies/{studyId}/members", studyId)
+                        .header("Authorization", "Bearer " + ownerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("스터디 멤버 목록을 조회했습니다."))
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[0].userId").value(owner.id()))
+                .andExpect(jsonPath("$.data[0].memberRole").value("OWNER"))
+                .andExpect(jsonPath("$.data[1].userId").value(applicant.id()))
+                .andExpect(jsonPath("$.data[1].nickname").value(applicant.nickname()))
+                .andExpect(jsonPath("$.data[1].memberRole").value("MEMBER"));
+    }
+
+    @Test
+    void rejectsMemberListFromNonOwner() throws Exception {
+        SignUpResponse owner = createUser(
+                "member-list-api-owner@example.com",
+                "member-list-api-owner"
+        );
+        SignUpResponse otherUser = createUser(
+                "member-list-api-other@example.com",
+                "member-list-api-other"
+        );
+        Long studyId = createStudy(owner, "멤버 목록 권한 API 테스트");
+        String otherToken = jwtTokenProvider.createAccessToken(otherUser.id(), UserRole.USER);
+
+        mockMvc.perform(get("/api/studies/{studyId}/members", studyId)
+                        .header("Authorization", "Bearer " + otherToken))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message")
+                        .value("스터디 개설자만 수행할 수 있습니다."));
+    }
+
+    @Test
+    void rejectsMemberListWithoutToken() throws Exception {
+        SignUpResponse owner = createUser(
+                "member-list-no-token-owner@example.com",
+                "member-list-no-token-owner"
+        );
+        Long studyId = createStudy(owner, "멤버 목록 미인증 테스트");
+
+        mockMvc.perform(get("/api/studies/{studyId}/members", studyId))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value("인증이 필요합니다."));
     }

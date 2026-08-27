@@ -3,6 +3,7 @@ package com.studygather.study.service;
 import com.studygather.study.dto.request.CreateStudyRequest;
 import com.studygather.study.dto.request.UpdateStudyRequest;
 import com.studygather.study.dto.response.StudyResponse;
+import com.studygather.study.dto.response.StudyMemberResponse;
 import com.studygather.study.dto.response.StudySummaryResponse;
 import com.studygather.study.entity.Study;
 import com.studygather.study.entity.StudyMember;
@@ -135,6 +136,51 @@ class StudyServiceTest {
         assertThrows(
                 StudyNotFoundException.class,
                 () -> studyService.getStudy(Long.MAX_VALUE)
+        );
+    }
+
+    @Test
+    void getStudyMembersReturnsOwnerAndApprovedMember() {
+        User owner = saveOwner("member-list-owner@example.com", "member-list-owner");
+        User memberUser = saveOwner("member-list-user@example.com", "member-list-user");
+        StudyResponse studyResponse = studyService.createStudy(owner.getId(), new CreateStudyRequest(
+                "멤버 목록 스터디",
+                "멤버 목록 조회 테스트입니다.",
+                5,
+                LocalDateTime.now().plusDays(7).withNano(0)
+        ));
+        Study study = studyRepository.findById(studyResponse.id()).orElseThrow();
+        studyMemberRepository.saveAndFlush(StudyMember.createMember(study, memberUser));
+
+        List<StudyMemberResponse> response = studyService.getStudyMembers(
+                owner.getId(),
+                study.getId()
+        );
+
+        assertEquals(2, response.size());
+        assertEquals(StudyMemberRole.OWNER, response.get(0).memberRole());
+        assertEquals(owner.getId(), response.get(0).userId());
+        assertEquals(StudyMemberRole.MEMBER, response.get(1).memberRole());
+        assertEquals(memberUser.getNickname(), response.get(1).nickname());
+    }
+
+    @Test
+    void getStudyMembersRejectsNonOwner() {
+        User owner = saveOwner("member-list-real-owner@example.com", "member-list-real-owner");
+        User otherUser = saveOwner("member-list-other-user@example.com", "member-list-other-user");
+        Study study = saveStudy(owner, "멤버 목록 권한 테스트", "개설자만 조회할 수 있습니다.");
+
+        assertThrows(
+                StudyOwnerRequiredException.class,
+                () -> studyService.getStudyMembers(otherUser.getId(), study.getId())
+        );
+    }
+
+    @Test
+    void getStudyMembersRejectsUnknownStudy() {
+        assertThrows(
+                StudyNotFoundException.class,
+                () -> studyService.getStudyMembers(1L, Long.MAX_VALUE)
         );
     }
 

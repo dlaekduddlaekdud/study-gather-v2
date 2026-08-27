@@ -3,6 +3,7 @@ package com.studygather.study.service;
 import com.studygather.study.dto.request.CreateStudyRequest;
 import com.studygather.study.dto.request.UpdateStudyRequest;
 import com.studygather.study.dto.response.StudyResponse;
+import com.studygather.study.dto.response.StudyMemberResponse;
 import com.studygather.study.dto.response.StudySummaryResponse;
 import com.studygather.study.entity.Study;
 import com.studygather.study.entity.StudyMember;
@@ -75,6 +76,18 @@ public class StudyService {
                 .orElseThrow(StudyNotFoundException::new);
 
         return StudyResponse.from(study);
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudyMemberResponse> getStudyMembers(Long userId, Long studyId) {
+        Study study = getStudyEntity(studyId);
+        validateOwner(study, userId);
+
+        return studyMemberRepository
+                .findAllByStudyIdOrderByJoinedAtAscIdAsc(studyId)
+                .stream()
+                .map(StudyMemberResponse::from)
+                .toList();
     }
 
     @Transactional

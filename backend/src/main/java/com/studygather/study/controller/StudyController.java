@@ -4,6 +4,7 @@ import com.studygather.common.api.ApiResponse;
 import com.studygather.study.dto.request.CreateStudyRequest;
 import com.studygather.study.dto.request.UpdateStudyRequest;
 import com.studygather.study.dto.response.StudyResponse;
+import com.studygather.study.dto.response.StudyMemberResponse;
 import com.studygather.study.dto.response.StudySummaryResponse;
 import com.studygather.study.service.StudyService;
 import jakarta.validation.Valid;
@@ -44,6 +45,16 @@ public class StudyController {
         StudyResponse response = studyService.getStudy(studyId);
 
         return ResponseEntity.ok(ApiResponse.success("스터디를 조회했습니다.", response));
+    }
+
+    @GetMapping("/{studyId}/members")
+    public ResponseEntity<ApiResponse<List<StudyMemberResponse>>> getStudyMembers(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long studyId
+    ) {
+        List<StudyMemberResponse> response = studyService.getStudyMembers(userId, studyId);
+
+        return ResponseEntity.ok(ApiResponse.success("스터디 멤버 목록을 조회했습니다.", response));
     }
 
     @PostMapping
