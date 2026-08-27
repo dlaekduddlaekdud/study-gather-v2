@@ -1,7 +1,16 @@
 package com.studygather.common.exception;
 
+import com.studygather.application.exception.ApplicationAlreadyExistsException;
+import com.studygather.application.exception.ApplicationApplicantRequiredException;
+import com.studygather.application.exception.ApplicationNotFoundException;
+import com.studygather.application.exception.InvalidApplicationStatusException;
+import com.studygather.application.exception.StudyOwnerCannotApplyException;
 import com.studygather.auth.exception.InvalidCredentialsException;
 import com.studygather.common.api.ApiResponse;
+import com.studygather.study.exception.StudyCapacityExceededException;
+import com.studygather.study.exception.StudyClosedException;
+import com.studygather.study.exception.StudyNotFoundException;
+import com.studygather.study.exception.StudyOwnerRequiredException;
 import com.studygather.user.exception.DuplicateEmailException;
 import com.studygather.user.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -14,6 +23,87 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ApplicationNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleApplicationNotFound(
+            ApplicationNotFoundException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
+
+    @ExceptionHandler(ApplicationApplicantRequiredException.class)
+    public ResponseEntity<ApiResponse<Void>> handleApplicationApplicantRequired(
+            ApplicationApplicantRequiredException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidApplicationStatusException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidApplicationStatus(
+            InvalidApplicationStatusException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
+
+    @ExceptionHandler(ApplicationAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleApplicationAlreadyExists(
+            ApplicationAlreadyExistsException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
+
+    @ExceptionHandler(StudyOwnerCannotApplyException.class)
+    public ResponseEntity<ApiResponse<Void>> handleStudyOwnerCannotApply(
+            StudyOwnerCannotApplyException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
+
+    @ExceptionHandler(StudyCapacityExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleStudyCapacityExceeded(
+            StudyCapacityExceededException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
+
+    @ExceptionHandler(StudyOwnerRequiredException.class)
+    public ResponseEntity<ApiResponse<Void>> handleStudyOwnerRequired(
+            StudyOwnerRequiredException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
+
+    @ExceptionHandler(StudyClosedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleStudyClosed(
+            StudyClosedException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
+
+    @ExceptionHandler(StudyNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleStudyNotFound(
+            StudyNotFoundException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleUserNotFound(
