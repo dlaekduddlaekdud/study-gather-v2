@@ -1,5 +1,7 @@
 package com.studygather.common.exception;
 
+import com.studygather.application.exception.ApplicationAlreadyExistsException;
+import com.studygather.application.exception.StudyOwnerCannotApplyException;
 import com.studygather.auth.exception.InvalidCredentialsException;
 import com.studygather.common.api.ApiResponse;
 import com.studygather.study.exception.StudyCapacityExceededException;
@@ -18,6 +20,24 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ApplicationAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleApplicationAlreadyExists(
+            ApplicationAlreadyExistsException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
+
+    @ExceptionHandler(StudyOwnerCannotApplyException.class)
+    public ResponseEntity<ApiResponse<Void>> handleStudyOwnerCannotApply(
+            StudyOwnerCannotApplyException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(exception.getMessage()));
+    }
 
     @ExceptionHandler(StudyCapacityExceededException.class)
     public ResponseEntity<ApiResponse<Void>> handleStudyCapacityExceeded(

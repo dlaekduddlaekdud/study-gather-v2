@@ -140,6 +140,10 @@ public class Study {
         return userId != null && Objects.equals(owner.getId(), userId);
     }
 
+    public boolean isRecruitingAt(LocalDateTime now) {
+        return status == StudyStatus.OPEN && recruitmentDeadline.isAfter(now);
+    }
+
     public void update(
             String title,
             String description,

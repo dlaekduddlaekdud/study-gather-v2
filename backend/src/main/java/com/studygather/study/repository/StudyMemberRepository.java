@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface StudyMemberRepository extends JpaRepository<StudyMember, Long> {
 
     Optional<StudyMember> findByStudyIdAndUserId(Long studyId, Long userId);
+
+    boolean existsByStudyIdAndUserId(Long studyId, Long userId);
 }
