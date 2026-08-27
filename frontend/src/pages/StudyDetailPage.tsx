@@ -144,6 +144,9 @@ export function StudyDetailPage() {
                   <Link className="text-link" to={`/studies/${study.id}/applications`}>
                     받은 신청 관리하기
                   </Link>
+                  <Link className="text-link application-notice__link" to={`/studies/${study.id}/members`}>
+                    멤버 확인하기
+                  </Link>
                 </div>
               ) : null}
               {user && user.id !== study.ownerId && study.status !== 'OPEN' ? (

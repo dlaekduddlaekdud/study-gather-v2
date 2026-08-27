@@ -139,6 +139,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .application-notice, .application-complete { padding: 20px; background: #f4f7ff; border: 1px solid #dfe6fa; border-radius: 12px; }
 .application-notice p, .application-complete p { margin: 0; color: var(--muted); line-height: 1.6; }
 .application-notice .text-link { display: inline-block; margin-top: 10px; }
+.application-notice .application-notice__link { margin-left: 18px; }
 .application-complete strong { display: block; margin-bottom: 8px; }
 .application-complete .text-link { display: inline-block; margin-top: 12px; }
 
@@ -170,6 +171,21 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .application-reject-button { color: #a13d49; background: white; border: 1px solid #e8c5ca; }
 .application-approve-button { color: white; background: var(--blue); border: 1px solid var(--blue); }
 .application-reject-button:disabled, .application-approve-button:disabled { opacity: .55; cursor: wait; }
+
+.members-page { width: min(100% - 48px, 820px); min-height: calc(100vh - 137px); margin: 0 auto; padding: 64px 0 80px; }
+.members-header { margin-bottom: 32px; }
+.members-header h1 { margin: 10px 0 12px; color: var(--navy); font-size: clamp(36px, 5vw, 52px); letter-spacing: -2.4px; }
+.members-header > p:last-child { margin: 0; color: var(--muted); font-weight: 700; }
+.member-list { display: grid; gap: 12px; }
+.member-card { padding: 22px 24px; display: flex; align-items: center; gap: 18px; background: white; border: 1px solid var(--line); border-radius: 15px; box-shadow: 0 10px 30px rgba(29,48,93,.05); }
+.member-avatar { width: 50px; height: 50px; flex: 0 0 50px; display: grid; place-items: center; color: white; background: linear-gradient(135deg, #3157d5, #7d93e8); border-radius: 15px; font-size: 20px; font-weight: 800; }
+.member-card__content { min-width: 0; flex: 1; }
+.member-card__content > div { display: flex; align-items: center; gap: 10px; }
+.member-card h2 { margin: 0; font-size: 18px; }
+.member-card p { margin: 7px 0 0; color: var(--muted); font-size: 13px; }
+.member-role { padding: 5px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+.member-role--owner { color: var(--blue-dark); background: #e4ecff; }
+.member-role--member { color: #16704b; background: #ddf7eb; }
 
 @keyframes study-loading-spin {
   to { transform: rotate(360deg); }
@@ -203,4 +219,6 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
   .application-form .submit-button { width: 100%; }
   .applications-page { width: min(100% - 40px, 880px); padding: 44px 0 64px; }
   .application-card__footer { align-items: flex-start; flex-direction: column; }
+  .members-page { width: min(100% - 40px, 820px); padding: 44px 0 64px; }
+  .application-notice .application-notice__link { margin-left: 0; display: block; }
 }
