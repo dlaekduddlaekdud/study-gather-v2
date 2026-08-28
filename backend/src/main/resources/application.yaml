@@ -14,9 +14,20 @@ spring:
     locations: classpath:db/migration
     validate-on-migrate: true
 
+server:
+  port: ${PORT:8080}
+
 jwt:
   secret: ${JWT_SECRET}
   access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+logging:
+  pattern:
+    level: "%5p [correlationId:%X{correlationId:-none}]"
 
 management:
   endpoints:

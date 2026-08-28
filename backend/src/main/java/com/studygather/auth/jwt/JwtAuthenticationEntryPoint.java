@@ -1,6 +1,6 @@
 package com.studygather.auth.jwt;
 
-import com.studygather.common.api.ApiResponse;
+import com.studygather.common.api.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
@@ -32,7 +32,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         objectMapper.writeValue(
                 response.getOutputStream(),
-                ApiResponse.error("인증이 필요합니다.")
+                ErrorResponse.from("인증이 필요합니다.")
         );
     }
 }
