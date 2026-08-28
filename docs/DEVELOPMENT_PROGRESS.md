@@ -20,11 +20,11 @@
 | Section 3. 스터디 생성과 신청 | 완료 | OpenAPI 기반 프론트와 브라우저 관통 흐름 및 CI 완료 |
 | Section 4. 승인·거절·취소·동시성 | 완료 | 프론트 관리 흐름·동시성·강제 rollback 및 CI 완료 |
 | Section 5. API 계약과 테스트 자동화 | 완료 | 계약 검사·Testcontainers·보안·계층·커버리지·프론트 오류 테스트 완료 |
-| Section 6. Docker·배포·운영 | 부분 완료 | DB 중단·복구 검증 완료, clean clone·README 정리 대기 |
+| Section 6. Docker·배포·운영 | 부분 완료 | README 실행 절차 갱신 후 clean clone 검증 대기 |
 | Section 7. 측정·문서·포트폴리오 | 미착수 | 최종 산출물과 측정 작업 미진행 |
 
-현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 Docker·DB 생명주기,
-CORS, correlation ID, 오류 traceId, DB 중단·복구를 검증한 뒤 clean clone 재현과 README 정리를 준비하는 단계**이다.
+현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 로컬 운영 기반을
+README에 반영한 뒤 별도 임시 디렉터리의 clean clone 재현 검증을 기다리는 단계**이다.
 
 ---
 
@@ -472,6 +472,13 @@ DB 장애·복구 검증 결과:
 - [x] DB 의존 API가 성공하지 않고 연결 실패 로그가 남는지 확인
 - [x] MySQL 재시작 후 백엔드 재시작 없이 두 컨테이너 `healthy` 복구
 - [x] readiness `UP`과 기존 스터디 데이터 조회 확인
+
+clean clone·README 진행 중:
+
+- [x] Compose 중심 빠른 시작과 프론트 실행 절차 갱신
+- [x] 환경변수·healthcheck·CORS·correlation ID 운영 절차 문서화
+- [x] 테스트·OpenAPI 계약·데이터 관리·문제 해결 절차 갱신
+- [ ] README 후보 커밋 후 별도 clean clone 재현 검증
 
 다음 작업 순서:
 
