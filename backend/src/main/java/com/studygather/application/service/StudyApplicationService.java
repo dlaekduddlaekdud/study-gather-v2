@@ -132,8 +132,8 @@ public class StudyApplicationService {
         lockedStudy.validateCapacityAvailable();
         application.approve();
         StudyMember member = StudyMember.createMember(lockedStudy, application.getApplicant());
-        studyMemberRepository.saveAndFlush(member);
         lockedStudy.increaseApprovedCount();
+        studyMemberRepository.saveAndFlush(member);
 
         return ApplicationResponse.from(application);
     }
