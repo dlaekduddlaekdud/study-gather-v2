@@ -1,6 +1,6 @@
 # Study Gather v2 개발 진행 현황
 
-마지막 확인일: 2026-08-27
+마지막 확인일: 2026-08-28
 
 이 문서는 실제 코드, 테스트, CI 설정을 기준으로 Section 1~7의 진행 상태를 추적한다.
 완료하지 않은 항목은 완료로 표시하지 않는다.
@@ -16,15 +16,15 @@
 | Section | 상태 | 현재 판단 |
 | --- | --- | --- |
 | Section 1. 프로젝트 초기화 | 완료 | 로컬 실행 기반과 첫 CI 구성 완료 |
-| Section 2. 인증 관통 기능 | 부분 완료 | 백엔드·프론트 로컬 관통 흐름 완료, 자동화·CI 미완료 |
-| Section 3. 스터디 생성과 신청 | 부분 완료 | 백엔드 완료, 프론트와 OpenAPI 타입 미완료 |
-| Section 4. 승인·거절·취소·동시성 | 부분 완료 | 백엔드 핵심 완료, 강제 rollback 테스트와 프론트 관리 화면 미완료 |
-| Section 5. API 계약과 테스트 자동화 | 미착수 | 기존 테스트는 있으나 계약 자동화 체계는 없음 |
-| Section 6. Docker·배포·운영 | 부분 완료 | MySQL Compose와 Actuator 기반만 존재 |
+| Section 2. 인증 관통 기능 | 부분 완료 | 백엔드·프론트 관통 흐름과 CI 완료, 프론트 인증 자동화 테스트 미완료 |
+| Section 3. 스터디 생성과 신청 | 완료 | OpenAPI 기반 프론트와 브라우저 관통 흐름 및 CI 완료 |
+| Section 4. 승인·거절·취소·동시성 | 완료 | 프론트 관리 흐름·동시성·강제 rollback 및 CI 완료 |
+| Section 5. API 계약과 테스트 자동화 | 완료 | 계약 검사·Testcontainers·보안·계층·커버리지·프론트 오류 테스트 완료 |
+| Section 6. Docker·배포·운영 | 부분 완료 | 환경변수 검증과 백엔드 Docker 이미지 빌드 완료, Compose 통합 대기 |
 | Section 7. 측정·문서·포트폴리오 | 미착수 | 최종 산출물과 측정 작업 미진행 |
 
-현재 개발 위치는 **Section 4 백엔드 핵심과 Section 2 프론트 인증 관통 흐름 완료 후,
-OpenAPI 타입 생성 기반을 시작하기 직전**이다.
+현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 필수 환경변수
+시작 검증과 백엔드 Docker 이미지 빌드를 완료한 뒤 Compose 통합을 준비하는 단계**이다.
 
 ---
 
@@ -57,7 +57,7 @@ OpenAPI 타입 생성 기반을 시작하기 직전**이다.
 
 ## Section 2. 첫 번째 관통 기능 - 회원가입부터 내 정보까지
 
-상태: **백엔드·프론트 로컬 관통 흐름 완료 / 자동화·CI 미완료**
+상태: **백엔드·프론트 관통 흐름 및 CI 완료 / 프론트 인증 자동화 테스트 미완료**
 
 - [x] `users` Flyway 마이그레이션
 - [x] User Entity
@@ -99,7 +99,8 @@ API 경로 주의:
 
 - 최초 계획: `GET /api/v1/users/me`
 - 현재 구현: `GET /api/users/me`
-- 현재 백엔드 전체가 `/api` prefix를 사용한다. `/api/v1` 도입 여부는 API 계약 자동화 전에 결정한다.
+- 현재 백엔드 전체가 `/api` prefix를 사용하며 현재 OpenAPI 계약도 이 경로를 기준으로 관리한다.
+- `/api/v1` 도입은 호환성 정책이 필요한 별도 변경으로 진행한다.
 
 ### Section 2 프론트 완료 계획
 
@@ -116,16 +117,16 @@ API 경로 주의:
 
 완료 게이트:
 
-- [x] 회원가입 화면·로그인·JWT 저장·내 정보 표시·새로고침 복원·로그아웃 실제 HTTP 동작
+- [x] 브라우저에서 회원가입부터 내 정보 표시까지 실제 HTTP로 동작
 - [x] `npm run lint` 성공
 - [x] `npm run build` 성공
-- [ ] 프론트·백엔드 GitHub Actions 통과
+- [x] 프론트·백엔드 GitHub Actions 통과
 
 ---
 
 ## Section 3. 두 번째 관통 기능 - 스터디 생성과 신청
 
-상태: **백엔드 완료 / 프론트·API 계약 미완료**
+상태: **완료**
 
 - [x] `studies` 테이블
 - [x] `study_members` 테이블
@@ -137,9 +138,10 @@ API 경로 주의:
 - [x] 참여 신청 API
 - [x] DTO validation
 - [x] 중복 신청 DB UNIQUE 제약
-- [ ] 프론트 목록·상세·생성·신청 화면
-- [ ] OpenAPI 생성 시작
-- [ ] OpenAPI 기반 프론트 타입 생성
+- [x] 프론트 목록·상세·생성·신청 화면
+- [x] 프론트 스터디 수정·모집 마감 화면
+- [x] OpenAPI 명세 조회와 JSON 생성 기반
+- [x] OpenAPI 기반 프론트 타입 생성
 
 계획보다 추가로 완료한 백엔드 기능:
 
@@ -147,7 +149,7 @@ API 경로 주의:
 - [x] 모집 마감
 - [x] 스터디 멤버 목록 조회
 
-curl로 확인한 백엔드 흐름:
+브라우저에서 확인한 실제 HTTP 흐름:
 
 ```text
 사용자 A 로그인
@@ -157,10 +159,10 @@ curl로 확인한 백엔드 흐름:
 → 참여 신청
 ```
 
-아직 충족하지 못한 완료 기준:
+로컬 완료 기준:
 
-- [ ] 위 흐름이 브라우저 화면에서 실제 HTTP로 동작
-- [ ] 프론트가 OpenAPI 생성 타입을 사용
+- [x] 위 흐름이 브라우저 화면에서 실제 HTTP로 동작
+- [x] 프론트가 OpenAPI 생성 타입을 사용
 
 ### Section 3 프론트 완료 계획
 
@@ -176,15 +178,15 @@ curl로 확인한 백엔드 흐름:
 
 완료 게이트:
 
-- [ ] 사용자 A 생성 → 사용자 B 신청 흐름을 브라우저에서 검증
-- [ ] OWNER 멤버와 신청 정보가 DB에 일관되게 저장됨을 확인
-- [ ] 프론트 lint·build와 CI 통과
+- [x] 사용자 A 생성 → 사용자 B 신청 흐름을 브라우저에서 검증
+- [x] OWNER 멤버와 신청 정보가 API 조회 결과에 일관되게 반영됨을 확인
+- [x] 프론트 lint·build와 CI 통과
 
 ---
 
 ## Section 4. 핵심 기능 - 승인·거절·취소·동시성
 
-상태: **백엔드 핵심 완료 / 일부 테스트·프론트 미완료**
+상태: **완료**
 
 - [x] 개설자의 신청 목록 조회
 - [x] 신청 승인
@@ -194,10 +196,12 @@ curl로 확인한 백엔드 흐름:
 - [x] Service에서 개설자 소유권 검증
 - [x] Study 조회에 비관적 쓰기 잠금 적용
 - [x] 승인 시 MEMBER 생성과 `approvedCount` 증가
-- [ ] 승인 중간 실패를 강제로 발생시키는 전체 rollback 테스트
+- [x] 승인 중간 실패를 강제로 발생시키는 전체 rollback 테스트
 - [x] 권한별 `401`·`403` 테스트
 - [x] 20개 동시 승인 테스트
-- [ ] 개설자 신청 관리 화면 연결
+- [x] 개설자 신청 관리 화면 연결
+- [x] 내 신청 목록과 PENDING 신청 취소 화면
+- [x] 스터디 멤버 목록 화면
 
 현재 승인 트랜잭션:
 
@@ -209,6 +213,7 @@ PENDING 신청 잠금·확인
 → 신청 APPROVED 전환
 → StudyMember 생성
 → approvedCount 증가
+→ StudyMember 저장
 → commit
 ```
 
@@ -226,12 +231,12 @@ PENDING 신청 잠금·확인
 `정원 초과 0건`은 정원을 넘어 DB에 저장된 승인 결과가 0건이라는 뜻이다. 마지막 한 자리를 제외한
 19개 요청은 정상적으로 정원 초과 예외를 반환한다.
 
-남은 rollback 검증:
+rollback 검증 결과:
 
-- 승인 상태 변경 후 멤버 저장 단계 등을 의도적으로 실패시킨다.
-- 트랜잭션 종료 후 application이 PENDING인지 확인한다.
-- MEMBER가 생성되지 않았는지 확인한다.
-- `approvedCount`가 증가하지 않았는지 확인한다.
+- [x] 승인 상태와 `approvedCount` 변경 후 멤버 저장을 강제로 실패시킴
+- [x] 트랜잭션 종료 후 application이 PENDING인지 확인
+- [x] MEMBER가 생성되지 않았는지 확인
+- [x] `approvedCount`가 1로 롤백됐는지 확인
 
 ### Section 4 프론트 완료 계획
 
@@ -245,11 +250,11 @@ PENDING 신청 잠금·확인
 
 완료 게이트:
 
-- [ ] 신청자 화면과 개설자 화면 사이의 전체 승인 흐름 검증
-- [ ] 승인 후 멤버 목록과 승인 인원 화면 갱신
-- [ ] 거절·취소 후 상태 화면 갱신
-- [ ] 프론트 lint·build와 CI 통과
-- [ ] 강제 중간 실패 rollback 테스트 통과
+- [x] 신청자 화면과 개설자 화면 사이의 전체 승인 흐름 검증
+- [x] 승인 후 멤버 목록과 승인 인원 화면 갱신
+- [x] 거절·취소 후 상태 화면 갱신
+- [x] 프론트 lint·build와 CI 통과
+- [x] 강제 중간 실패 rollback 테스트 통과
 
 ---
 
@@ -288,26 +293,26 @@ PENDING 신청 잠금·확인
 
 ---
 
-## Section 2~4 남은 작업 실행 순서
+## Section 2~4 완료한 작업 순서
 
-### 1. `feature/frontend-auth` - 로컬 구현·검증 완료
+### 1. `feature/frontend-auth` - 완료
 
 Section 2의 프론트 인증 관통 흐름을 완성한다.
 
-### 2. `feature/api-contract-baseline`
+### 2. `feature/api-contract-baseline` - 완료
 
 Section 3에서 미뤄 둔 OpenAPI 생성을 시작하고 프론트 타입 생성 기반을 만든다. 인증 화면에서 먼저
 작성한 최소 수동 타입을 생성 타입으로 교체한다.
 
-### 3. `feature/frontend-study`
+### 3. `feature/frontend-study` - 완료
 
 생성 타입을 사용해 Section 3의 목록·상세·생성·신청 화면을 완성한다.
 
-### 4. `feature/frontend-application`
+### 4. `feature/frontend-application` - 완료
 
 Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완성한다.
 
-### 5. `test/approval-rollback`
+### 5. `test/approval-rollback` - 완료
 
 승인 중간 실패 시 application·member·count 전체 rollback을 검증한다.
 
@@ -316,43 +321,61 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 다음 항목을 모두 만족하기 전에는 Section 5의 나머지 자동화 작업으로 넘어가지 않는다.
 
 - [x] Section 2 브라우저 인증 관통 흐름 완료
-- [ ] Section 3 브라우저 스터디 생성·신청 흐름 완료
-- [ ] Section 4 브라우저 신청 관리 흐름 완료
-- [ ] OpenAPI 생성 타입을 프론트 API에서 사용
-- [ ] 승인 강제 실패 rollback 테스트 완료
-- [ ] 백엔드·프론트 전체 테스트와 CI 통과
+- [x] Section 3 브라우저 스터디 생성·신청 흐름 완료
+- [x] Section 4 브라우저 신청 관리 흐름 완료
+- [x] OpenAPI 생성 타입을 프론트 API에서 사용
+- [x] 승인 강제 실패 rollback 테스트 완료
+- [x] 백엔드·프론트 전체 테스트와 CI 통과
 
 ---
 
 ## Section 5. API 계약과 테스트 자동화
 
-상태: **미착수**
+상태: **완료**
 
-- [ ] OpenAPI JSON 자동 생성
-- [ ] `docs/openapi.json` 버전 관리
-- [ ] `openapi-typescript` 타입 생성
-- [ ] 프론트 API에서 생성 타입 사용
-- [ ] OpenAPI 변경 여부를 CI에서 검사
-- [ ] Testcontainers MySQL 통합 테스트
-- [ ] Security 테스트 보강
-- [ ] Repository·Service 테스트 보강
-- [ ] JaCoCo 적용
-- [ ] 프론트의 `400`·`401`·`403`·`409` 처리
-- [ ] DTO 변경 시 CI 실패 실험 기록
+- [x] OpenAPI JSON 자동 생성
+- [x] `docs/openapi.json` 버전 관리
+- [x] `openapi-typescript` 타입 생성
+- [x] 프론트 API에서 생성 타입 사용
+- [x] OpenAPI 변경 여부를 CI에서 검사
+- [x] Testcontainers MySQL 통합 테스트
+- [x] Security 테스트 보강
+- [x] Repository·Service 테스트 보강
+- [x] JaCoCo 적용
+- [x] 프론트의 `400`·`401`·`403`·`409` 처리
+- [x] DTO 변경 시 CI 실패 실험 기록
 
-참고: Security·Repository·Service 테스트는 이미 존재하지만, Section 5에서 요구하는 계약 자동화와
-독립적인 Testcontainers 테스트 환경까지 완료한 것은 아니다.
+자동화 검증 결과:
+
+- [x] 로컬에서 백엔드 실행부터 명세·타입 재생성 및 변경 검사까지 통과
+- [x] GitHub Actions의 Backend·Frontend·API Contract 작업 통과
+- [x] 계약 자동화 PR이 `main`에 병합됨
+- [x] Repository 테스트가 Testcontainers MySQL에서 실행됨
+- [x] JWT 보안 경계와 Repository·Service 경계 테스트 통과
+- [x] JaCoCo 라인 90%, 브랜치 70% 최소 기준 적용
+- [x] DTO 계약 변경 시 CI 실패 감지 실험과 자동 복구 확인
+- [x] 프론트 API 오류 처리 테스트 8개와 lint·build 통과
+
+완료한 작업 순서:
+
+1. `feature/openapi-contract-ci` - OpenAPI 계약 변경 CI
+2. `test/testcontainers-mysql` - Repository Testcontainers MySQL
+3. `test/security-hardening` - JWT 보안 경계 테스트
+4. `test/repository-service-hardening` - Repository·Service 경계 테스트
+5. `test/jacoco-coverage` - JaCoCo 커버리지 검증
+6. `test/openapi-contract-failure` - DTO 계약 변경 실패 실험
+7. `test/frontend-api-errors` - 프론트 API 오류 처리 테스트
 
 ---
 
 ## Section 6. Docker·배포·운영
 
-상태: **일부 기반만 완료**
+상태: **운영 기반 확장 진행 중**
 
 - [ ] Docker Compose에서 MySQL과 백엔드 함께 실행 - 현재 MySQL만 실행
 - [ ] healthcheck와 DB 준비 순서 설정 - MySQL healthcheck만 존재
 - [ ] Flyway clean 실행 검증
-- [ ] 환경변수 시작 시 검증 - 기본 주입은 있으나 명시적 검증 기준 미완료
+- [x] 환경변수 시작 시 검증
 - [ ] CORS 설정
 - [ ] correlation ID 적용
 - [ ] 오류 응답의 traceId와 로그 연결
@@ -367,6 +390,27 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 - [x] 잘못된 JWT
 - [x] 중복 신청
 - [ ] 백엔드 재시작 후 데이터 유지 증거 기록
+
+완료한 운영 기반:
+
+- [x] DB URL·사용자명·비밀번호의 빈 값 검증 구현
+- [x] JWT 비밀키의 Base64 형식과 최소 32바이트 검증 구현
+- [x] JWT 만료시간의 누락과 최소 1초 검증 구현
+- [x] 설정 바인딩 테스트 9개, JWT 테스트 3개, 전체 백엔드 빌드 통과
+- [x] PR #13의 Backend·Frontend·API Contract CI 통과 및 `main` 병합
+
+현재 진행 중:
+
+- [x] Java 21 멀티 스테이지 백엔드 Dockerfile 작성
+- [x] 비루트 사용자로 백엔드 프로세스 실행 구성
+- [x] 로컬 Docker 이미지 빌드 검증
+
+다음 작업 순서:
+
+1. Docker Compose에서 MySQL과 백엔드를 함께 실행한다.
+2. MySQL healthcheck를 기준으로 백엔드 시작 순서를 구성한다.
+3. Flyway clean 실행과 백엔드 재시작 후 데이터 유지를 검증한다.
+4. CORS, correlation ID, 오류 응답 traceId를 각각 기능 단위로 적용한다.
 
 ---
 
