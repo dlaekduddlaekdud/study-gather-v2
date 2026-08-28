@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.core.Authentication;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -47,7 +49,8 @@ class SecurityIntegrationTest {
         mockMvc.perform(get("/api/test/protected")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId").value(1));
+                .andExpect(jsonPath("$.userId").value(1))
+                .andExpect(jsonPath("$.authority").value("ROLE_USER"));
     }
 
     @Test
@@ -59,17 +62,65 @@ class SecurityIntegrationTest {
                 .andExpect(jsonPath("$.message").value("인증이 필요합니다."));
     }
 
+    @Test
+    void rejectsProtectedRequestWithBlankBearerToken() throws Exception {
+        mockMvc.perform(get("/api/test/protected")
+                        .header("Authorization", "Bearer "))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("인증이 필요합니다."));
+    }
+
+    @Test
+    void rejectsProtectedRequestWithTamperedToken() throws Exception {
+        String token = jwtTokenProvider.createAccessToken(1L, UserRole.USER);
+
+        mockMvc.perform(get("/api/test/protected")
+                        .header("Authorization", "Bearer " + tamperSignature(token)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("인증이 필요합니다."));
+    }
+
+    @Test
+    void doesNotPersistAuthenticationBetweenRequests() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        String token = jwtTokenProvider.createAccessToken(1L, UserRole.USER);
+
+        mockMvc.perform(get("/api/test/protected")
+                        .session(session)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/test/protected")
+                        .session(session))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("인증이 필요합니다."));
+    }
+
+    private String tamperSignature(String token) {
+        int signatureStart = token.lastIndexOf('.') + 1;
+        char current = token.charAt(signatureStart);
+        char replacement = current == 'a' ? 'b' : 'a';
+
+        return token.substring(0, signatureStart)
+                + replacement
+                + token.substring(signatureStart + 1);
+    }
+
     @RestController
     static class ProtectedTestController {
 
         @GetMapping("/api/test/protected")
         public ProtectedResponse protectedEndpoint(
-                org.springframework.security.core.Authentication authentication
+                Authentication authentication
         ) {
-            return new ProtectedResponse((Long) authentication.getPrincipal());
+            String authority = authentication.getAuthorities().iterator().next().getAuthority();
+            return new ProtectedResponse((Long) authentication.getPrincipal(), authority);
         }
     }
 
-    record ProtectedResponse(Long userId) {
+    record ProtectedResponse(Long userId, String authority) {
     }
 }
