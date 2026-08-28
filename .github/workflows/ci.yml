@@ -52,6 +52,17 @@ jobs:
       - name: 백엔드 테스트 및 빌드
         run: ./gradlew clean build --no-daemon
 
+      - name: JaCoCo 리포트 업로드
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-jacoco-report
+          path: |
+            backend/build/reports/jacoco/test/html
+            backend/build/reports/jacoco/test/jacocoTestReport.xml
+          if-no-files-found: warn
+          retention-days: 14
+
   frontend:
     name: Frontend
     runs-on: ubuntu-latest
