@@ -20,11 +20,11 @@
 | Section 3. 스터디 생성과 신청 | 완료 | OpenAPI 기반 프론트와 브라우저 관통 흐름 및 CI 완료 |
 | Section 4. 승인·거절·취소·동시성 | 완료 | 프론트 관리 흐름·동시성·강제 rollback 및 CI 완료 |
 | Section 5. API 계약과 테스트 자동화 | 완료 | 계약 검사·Testcontainers·보안·계층·커버리지·프론트 오류 테스트 완료 |
-| Section 6. Docker·배포·운영 | 부분 완료 | Docker·DB 생명주기 검증 완료, CORS 적용 대기 |
+| Section 6. Docker·배포·운영 | 부분 완료 | CORS 검증 완료, correlation ID 적용 대기 |
 | Section 7. 측정·문서·포트폴리오 | 미착수 | 최종 산출물과 측정 작업 미진행 |
 
-현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 MySQL·백엔드
-Compose, Flyway clean 재생성, 백엔드 재시작 데이터 유지를 검증한 뒤 CORS 적용을 준비하는 단계**이다.
+현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 Docker·DB 생명주기와
+CORS 허용·거부 Origin을 검증한 뒤 correlation ID 적용을 준비하는 단계**이다.
 
 ---
 
@@ -376,7 +376,7 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 - [x] healthcheck와 DB 준비 순서 설정
 - [x] Flyway clean 실행 검증
 - [x] 환경변수 시작 시 검증
-- [ ] CORS 설정
+- [x] CORS 설정
 - [ ] correlation ID 적용
 - [ ] 오류 응답의 traceId와 로그 연결
 - [x] Actuator health·liveness·readiness 구성
@@ -422,10 +422,23 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 - [x] 재시작 후 동일 계정 로그인과 `/api/users/me` 조회 성공
 - [x] 사용자 ID·이메일·닉네임 유지 확인
 
+CORS 진행 중:
+
+- [x] 허용 Origin 환경변수 외부화
+- [x] API 메서드·요청 헤더 최소 허용 정책 구성
+- [x] 허용·거부 Origin 통합 테스트 작성
+- [x] CORS 통합 테스트와 전체 백엔드 검증
+
+CORS 검증 결과:
+
+- [x] 허용 Origin preflight `200`과 허용 헤더 확인
+- [x] 미허용 Origin preflight `403` 확인
+- [x] Compose 백엔드 재빌드 후 readiness `UP`
+
 다음 작업 순서:
 
-1. CORS를 적용하고 허용·거부 origin을 검증한다.
-2. correlation ID와 오류 응답 traceId를 각각 기능 단위로 적용한다.
+1. correlation ID를 요청·응답과 로그에 적용한다.
+2. 오류 응답 traceId를 correlation ID와 연결한다.
 
 ---
 
