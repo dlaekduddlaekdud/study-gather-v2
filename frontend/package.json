@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "openapi:download": "curl --fail --silent --show-error http://localhost:8080/v3/api-docs --output ../docs/openapi.json",
-    "openapi:generate": "npm run openapi:download && openapi-typescript ../docs/openapi.json -o src/api/generated/schema.ts",
+    "openapi:types": "openapi-typescript ../docs/openapi.json -o src/api/generated/schema.ts",
+    "openapi:generate": "npm run openapi:download && npm run openapi:types",
     "preview": "vite preview"
   },
   "dependencies": {
