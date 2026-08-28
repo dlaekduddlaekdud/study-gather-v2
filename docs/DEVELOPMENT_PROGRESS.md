@@ -1,6 +1,6 @@
 # Study Gather v2 개발 진행 현황
 
-마지막 확인일: 2026-08-28
+마지막 확인일: 2026-08-29
 
 이 문서는 실제 코드, 테스트, CI 설정을 기준으로 Section 1~7의 진행 상태를 추적한다.
 완료하지 않은 항목은 완료로 표시하지 않는다.
@@ -20,11 +20,11 @@
 | Section 3. 스터디 생성과 신청 | 완료 | OpenAPI 기반 프론트와 브라우저 관통 흐름 및 CI 완료 |
 | Section 4. 승인·거절·취소·동시성 | 완료 | 프론트 관리 흐름·동시성·강제 rollback 및 CI 완료 |
 | Section 5. API 계약과 테스트 자동화 | 완료 | 계약 검사·Testcontainers·보안·계층·커버리지·프론트 오류 테스트 완료 |
-| Section 6. Docker·배포·운영 | 부분 완료 | 로컬 운영·clean clone·README 완료, 배포 대기 |
+| Section 6. Docker·배포·운영 | 완료 | 로컬 운영·clean clone·무료 배포·관통 검증 완료 |
 | Section 7. 측정·문서·포트폴리오 | 미착수 | 최종 산출물과 측정 작업 미진행 |
 
-현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 로컬 운영 기반,
-clean clone 재현, README 실행 절차를 검증한 뒤 배포를 준비하는 단계**이다.
+현재 개발 위치는 **Section 6의 Docker·운영 기반, clean clone 재현과 무료 배포 관통 검증까지
+완료하고 Section 7의 측정·문서·포트폴리오 작업을 준비하는 단계**이다.
 
 ---
 
@@ -370,7 +370,7 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 
 ## Section 6. Docker·배포·운영
 
-상태: **무료 배포 진행 중**
+상태: **완료**
 
 - [x] Docker Compose에서 MySQL과 백엔드 함께 실행
 - [x] healthcheck와 DB 준비 순서 설정
@@ -380,7 +380,7 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 - [x] correlation ID 적용
 - [x] 오류 응답의 traceId와 로그 연결
 - [x] Actuator health·liveness·readiness 구성
-- [ ] 배포
+- [x] 배포
 - [x] clean clone 재현
 - [x] README 실행 절차 최종 완성
 
@@ -496,8 +496,8 @@ clean clone 검증 결과:
 - [x] Render 무료 인스턴스용 JVM·DB 커넥션 풀 제한 구성
 - [x] TiDB Cloud Starter 생성과 Flyway 마이그레이션 확인
 - [x] Render 백엔드 배포와 readiness 확인
-- [ ] Cloudflare Pages 프론트엔드 배포와 CORS 연결 확인
-- [ ] 배포 URL에서 회원가입·로그인·스터디 흐름 관통 검증
+- [x] Cloudflare Pages 프론트엔드 배포와 CORS 연결 확인
+- [x] 배포 URL에서 회원가입·로그인·스터디 흐름 관통 검증
 
 백엔드 배포 검증 결과:
 
@@ -511,12 +511,20 @@ clean clone 검증 결과:
 - [x] 배포 환경 API 기본 주소 외부화
 - [x] Cloudflare Pages SPA fallback 구성
 - [x] 프론트엔드 테스트·lint·production build 검증
-- [ ] Cloudflare Pages 프로젝트 생성과 배포
-- [ ] 실제 Pages Origin으로 백엔드 CORS 갱신
+- [x] Cloudflare Pages 프로젝트 생성과 배포
+- [x] 실제 Pages Origin으로 백엔드 CORS 갱신
+
+배포 관통 검증 결과:
+
+- [x] Pages Origin preflight `200`과 `Access-Control-Allow-Origin` 확인
+- [x] 배포 화면에서 회원가입·로그인·마이페이지 조회 성공
+- [x] 스터디 생성 후 상세·목록 조회 성공
+- [x] 새로고침 후 생성 데이터 유지 확인
+- [x] Cloudflare Pages → Render → TiDB Cloud 쓰기·조회 흐름 확인
 
 다음 작업 순서:
 
-1. 배포 환경을 구성하고 검증한다.
+1. Section 7의 아키텍처·측정·포트폴리오 증거물을 작성한다.
 
 ---
 
