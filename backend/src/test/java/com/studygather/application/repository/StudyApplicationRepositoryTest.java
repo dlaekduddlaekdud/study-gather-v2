@@ -4,12 +4,15 @@ import com.studygather.application.entity.ApplicationStatus;
 import com.studygather.application.entity.StudyApplication;
 import com.studygather.study.entity.Study;
 import com.studygather.study.repository.StudyRepository;
+import com.studygather.support.MySqlTestcontainersConfiguration;
 import com.studygather.user.entity.User;
 import com.studygather.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -19,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
+@ActiveProfiles("testcontainers")
+@Import(MySqlTestcontainersConfiguration.class)
 @Transactional
 class StudyApplicationRepositoryTest {
 
