@@ -21,6 +21,7 @@ function jsonResponse(body: unknown, status = 200): Response {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
 })
 
 describe('apiRequest', () => {
@@ -94,5 +95,25 @@ describe('apiRequest', () => {
       },
       body: JSON.stringify({ title: '테스트 스터디' }),
     })
+  })
+
+  it('배포 환경에서는 API 기본 주소를 요청 경로 앞에 붙인다', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
+      success: true,
+      message: '조회 성공',
+      data: { id: 3 },
+    }))
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubEnv('VITE_API_BASE_URL', 'https://study-gather-backend.onrender.com/')
+
+    await apiRequest<TestData>('/api/test')
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://study-gather-backend.onrender.com/api/test',
+      {
+        headers: {},
+        body: undefined,
+      },
+    )
   })
 })
