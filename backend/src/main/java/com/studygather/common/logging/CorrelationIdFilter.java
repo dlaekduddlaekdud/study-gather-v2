@@ -23,7 +23,6 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
     public static final String HEADER_NAME = "X-Correlation-ID";
     public static final String REQUEST_ATTRIBUTE_NAME =
             CorrelationIdFilter.class.getName() + ".correlationId";
-    public static final String MDC_KEY = "correlationId";
 
     private static final Logger log = LoggerFactory.getLogger(CorrelationIdFilter.class);
     private static final Pattern VALID_CORRELATION_ID =
@@ -36,11 +35,11 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String correlationId = resolveCorrelationId(request.getHeader(HEADER_NAME));
-        String previousCorrelationId = MDC.get(MDC_KEY);
+        String previousCorrelationId = MDC.get(CorrelationIdContext.MDC_KEY);
 
         request.setAttribute(REQUEST_ATTRIBUTE_NAME, correlationId);
         response.setHeader(HEADER_NAME, correlationId);
-        MDC.put(MDC_KEY, correlationId);
+        MDC.put(CorrelationIdContext.MDC_KEY, correlationId);
 
         try {
             filterChain.doFilter(request, response);
@@ -77,10 +76,10 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
 
     private void restorePreviousCorrelationId(String previousCorrelationId) {
         if (previousCorrelationId == null) {
-            MDC.remove(MDC_KEY);
+            MDC.remove(CorrelationIdContext.MDC_KEY);
             return;
         }
 
-        MDC.put(MDC_KEY, previousCorrelationId);
+        MDC.put(CorrelationIdContext.MDC_KEY, previousCorrelationId);
     }
 }

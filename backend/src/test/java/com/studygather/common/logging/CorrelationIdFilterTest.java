@@ -30,7 +30,7 @@ class CorrelationIdFilterTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
         request.addHeader(CorrelationIdFilter.HEADER_NAME, correlationId);
         FilterChain filterChain = (servletRequest, servletResponse) -> {
-            assertEquals(correlationId, MDC.get(CorrelationIdFilter.MDC_KEY));
+            assertEquals(correlationId, MDC.get(CorrelationIdContext.MDC_KEY));
             assertEquals(
                     correlationId,
                     servletRequest.getAttribute(CorrelationIdFilter.REQUEST_ATTRIBUTE_NAME)
@@ -40,7 +40,7 @@ class CorrelationIdFilterTest {
         filter.doFilter(request, response, filterChain);
 
         assertEquals(correlationId, response.getHeader(CorrelationIdFilter.HEADER_NAME));
-        assertNull(MDC.get(CorrelationIdFilter.MDC_KEY));
+        assertNull(MDC.get(CorrelationIdContext.MDC_KEY));
     }
 
     @Test
