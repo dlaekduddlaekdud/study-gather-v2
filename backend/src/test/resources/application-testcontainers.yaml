@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    # 실제 연결 정보는 @ServiceConnection이 Testcontainers에서 가져온다.
+    url: jdbc:mysql://localhost:1/unused
+    username: unused
+    password: unused
+
+jwt:
+  secret: dGVzdC1qd3Qtc2VjcmV0LWtleS1tdXN0LWJlLWF0LWxlYXN0LTMyLWJ5dGVz
+  access-token-expiration: 1h
