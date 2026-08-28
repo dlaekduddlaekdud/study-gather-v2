@@ -6,6 +6,7 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 project_dir="$(cd "$script_dir/.." && pwd)"
 server_log="$(mktemp "${TMPDIR:-/tmp}/study-gather-openapi.XXXXXX.log")"
 backend_pid=""
+readiness_timeout_seconds=180
 
 cleanup() {
   if [[ -n "$backend_pid" ]] && kill -0 "$backend_pid" 2>/dev/null; then
@@ -44,7 +45,7 @@ fi
 ) >"$server_log" 2>&1 &
 backend_pid=$!
 
-for attempt in {1..60}; do
+for ((attempt = 1; attempt <= readiness_timeout_seconds; attempt++)); do
   if curl --fail --silent --output /dev/null \
     http://localhost:8080/actuator/health/readiness; then
     break
@@ -56,8 +57,8 @@ for attempt in {1..60}; do
     exit 1
   fi
 
-  if [[ "$attempt" -eq 60 ]]; then
-    echo "60초 안에 백엔드가 준비되지 않았습니다." >&2
+  if [[ "$attempt" -eq "$readiness_timeout_seconds" ]]; then
+    echo "${readiness_timeout_seconds}초 안에 백엔드가 준비되지 않았습니다." >&2
     tail -n 100 "$server_log" >&2
     exit 1
   fi
