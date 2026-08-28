@@ -370,7 +370,7 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 
 ## Section 6. Docker·배포·운영
 
-상태: **운영 기반 확장 진행 중**
+상태: **무료 배포 진행 중**
 
 - [x] Docker Compose에서 MySQL과 백엔드 함께 실행
 - [x] healthcheck와 DB 준비 순서 설정
@@ -488,6 +488,16 @@ clean clone 검증 결과:
 - [x] 백엔드 `check`와 프론트 테스트·lint·build 통과
 - [x] OpenAPI 계약과 생성 타입 일치, clean clone 작업 트리 변경 없음
 - [x] 임시 Compose·volume 정리 후 원본 DB와 기존 데이터 복구
+
+무료 배포 진행 중:
+
+- [x] Cloudflare Pages + Render + TiDB Cloud Starter 구성 선택
+- [x] Render Blueprint와 동적 서버 포트 구성
+- [x] Render 무료 인스턴스용 JVM·DB 커넥션 풀 제한 구성
+- [ ] TiDB Cloud Starter 생성과 Flyway 마이그레이션 확인
+- [ ] Render 백엔드 배포와 readiness 확인
+- [ ] Cloudflare Pages 프론트엔드 배포와 CORS 연결 확인
+- [ ] 배포 URL에서 회원가입·로그인·스터디 흐름 관통 검증
 
 다음 작업 순서:
 
