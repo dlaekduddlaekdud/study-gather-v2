@@ -108,6 +108,31 @@ class StudyApplicationServiceTest {
     }
 
     @Test
+    void createApplicationRejectsExistingStudyMember() {
+        TestData testData = createTestData("existing-member-application");
+        studyMemberRepository.saveAndFlush(StudyMember.createMember(
+                studyRepository.findById(testData.study().id()).orElseThrow(),
+                testData.applicant()
+        ));
+
+        assertThrows(
+                ApplicationAlreadyExistsException.class,
+                () -> applicationService.createApplication(
+                        testData.applicant().getId(),
+                        testData.study().id(),
+                        new CreateApplicationRequest("이미 멤버인 사용자의 재신청")
+                )
+        );
+        assertEquals(
+                false,
+                applicationRepository.existsByStudyIdAndApplicantId(
+                        testData.study().id(),
+                        testData.applicant().getId()
+                )
+        );
+    }
+
+    @Test
     void createApplicationRejectsClosedStudy() {
         TestData testData = createTestData("closed-application");
         studyService.closeStudy(testData.study().ownerId(), testData.study().id());

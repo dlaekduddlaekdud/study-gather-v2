@@ -9,6 +9,7 @@ import com.studygather.study.entity.Study;
 import com.studygather.study.entity.StudyMember;
 import com.studygather.study.entity.StudyMemberRole;
 import com.studygather.study.entity.StudyStatus;
+import com.studygather.study.exception.StudyCapacityExceededException;
 import com.studygather.study.exception.StudyClosedException;
 import com.studygather.study.exception.StudyNotFoundException;
 import com.studygather.study.exception.StudyOwnerRequiredException;
@@ -217,6 +218,25 @@ class StudyServiceTest {
                 )
         );
         assertEquals("원래 제목", study.getTitle());
+    }
+
+    @Test
+    void updateStudyRejectsCapacityBelowApprovedCount() {
+        User owner = saveOwner("capacity-update-owner@example.com", "capacity-update-owner");
+        Study study = saveStudy(owner, "정원 축소 방지", "승인 인원 불변식 테스트");
+        study.increaseApprovedCount();
+        study.increaseApprovedCount();
+        studyRepository.flush();
+
+        assertThrows(
+                StudyCapacityExceededException.class,
+                () -> studyService.updateStudy(
+                        owner.getId(),
+                        study.getId(),
+                        new UpdateStudyRequest(null, null, 2, null)
+                )
+        );
+        assertEquals(5, study.getCapacity());
     }
 
     @Test
