@@ -20,11 +20,11 @@
 | Section 3. 스터디 생성과 신청 | 완료 | OpenAPI 기반 프론트와 브라우저 관통 흐름 및 CI 완료 |
 | Section 4. 승인·거절·취소·동시성 | 완료 | 프론트 관리 흐름·동시성·강제 rollback 및 CI 완료 |
 | Section 5. API 계약과 테스트 자동화 | 완료 | 계약 검사·Testcontainers·보안·계층·커버리지·프론트 오류 테스트 완료 |
-| Section 6. Docker·배포·운영 | 부분 완료 | MySQL·백엔드 Compose와 healthcheck 완료, 데이터 유지 검증 대기 |
+| Section 6. Docker·배포·운영 | 부분 완료 | Compose와 격리된 Flyway clean 검증 완료, 데이터 유지 검증 대기 |
 | Section 7. 측정·문서·포트폴리오 | 미착수 | 최종 산출물과 측정 작업 미진행 |
 
 현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 MySQL·백엔드
-Compose 통합과 healthcheck 시작 순서를 검증한 뒤 데이터 유지·Flyway 검증을 준비하는 단계**이다.
+Compose 통합과 격리된 Flyway clean 재생성을 검증한 뒤 백엔드 재시작 데이터 유지를 확인하는 단계**이다.
 
 ---
 
@@ -374,7 +374,7 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 
 - [x] Docker Compose에서 MySQL과 백엔드 함께 실행
 - [x] healthcheck와 DB 준비 순서 설정
-- [ ] Flyway clean 실행 검증
+- [x] Flyway clean 실행 검증
 - [x] 환경변수 시작 시 검증
 - [ ] CORS 설정
 - [ ] correlation ID 적용
@@ -412,10 +412,12 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 - [x] MySQL `service_healthy` 이후 백엔드 시작 구성
 - [x] 백엔드 readiness healthcheck 구성
 - [x] MySQL·백엔드 Compose 로컬 관통 검증
+- [x] Testcontainers MySQL 기반 Flyway `clean → migrate` 테스트 작성
+- [x] Flyway clean 통합 테스트와 전체 백엔드 검증
 
 다음 작업 순서:
 
-1. Flyway clean 실행과 백엔드 재시작 후 데이터 유지를 검증한다.
+1. 백엔드 재시작 후 Compose 데이터 유지를 검증한다.
 2. CORS, correlation ID, 오류 응답 traceId를 각각 기능 단위로 적용한다.
 
 ---
