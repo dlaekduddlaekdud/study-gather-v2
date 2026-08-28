@@ -20,11 +20,11 @@
 | Section 3. 스터디 생성과 신청 | 완료 | OpenAPI 기반 프론트와 브라우저 관통 흐름 및 CI 완료 |
 | Section 4. 승인·거절·취소·동시성 | 완료 | 프론트 관리 흐름·동시성·강제 rollback 및 CI 완료 |
 | Section 5. API 계약과 테스트 자동화 | 완료 | 계약 검사·Testcontainers·보안·계층·커버리지·프론트 오류 테스트 완료 |
-| Section 6. Docker·배포·운영 | 부분 완료 | Compose와 격리된 Flyway clean 검증 완료, 데이터 유지 검증 대기 |
+| Section 6. Docker·배포·운영 | 부분 완료 | Docker·DB 생명주기 검증 완료, CORS 적용 대기 |
 | Section 7. 측정·문서·포트폴리오 | 미착수 | 최종 산출물과 측정 작업 미진행 |
 
 현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 MySQL·백엔드
-Compose 통합과 격리된 Flyway clean 재생성을 검증한 뒤 백엔드 재시작 데이터 유지를 확인하는 단계**이다.
+Compose, Flyway clean 재생성, 백엔드 재시작 데이터 유지를 검증한 뒤 CORS 적용을 준비하는 단계**이다.
 
 ---
 
@@ -389,7 +389,7 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 - [ ] DB 중단
 - [x] 잘못된 JWT
 - [x] 중복 신청
-- [ ] 백엔드 재시작 후 데이터 유지 증거 기록
+- [x] 백엔드 재시작 후 데이터 유지 증거 기록
 
 완료한 운영 기반:
 
@@ -415,10 +415,17 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 - [x] Testcontainers MySQL 기반 Flyway `clean → migrate` 테스트 작성
 - [x] Flyway clean 통합 테스트와 전체 백엔드 검증
 
+데이터 유지 검증 결과:
+
+- [x] Compose 환경에서 검증 사용자 ID `7082` 생성
+- [x] MySQL을 유지하고 백엔드 컨테이너만 재시작
+- [x] 재시작 후 동일 계정 로그인과 `/api/users/me` 조회 성공
+- [x] 사용자 ID·이메일·닉네임 유지 확인
+
 다음 작업 순서:
 
-1. 백엔드 재시작 후 Compose 데이터 유지를 검증한다.
-2. CORS, correlation ID, 오류 응답 traceId를 각각 기능 단위로 적용한다.
+1. CORS를 적용하고 허용·거부 origin을 검증한다.
+2. correlation ID와 오류 응답 traceId를 각각 기능 단위로 적용한다.
 
 ---
 
