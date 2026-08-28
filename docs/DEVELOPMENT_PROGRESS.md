@@ -494,10 +494,25 @@ clean clone 검증 결과:
 - [x] Cloudflare Pages + Render + TiDB Cloud Starter 구성 선택
 - [x] Render Blueprint와 동적 서버 포트 구성
 - [x] Render 무료 인스턴스용 JVM·DB 커넥션 풀 제한 구성
-- [ ] TiDB Cloud Starter 생성과 Flyway 마이그레이션 확인
-- [ ] Render 백엔드 배포와 readiness 확인
+- [x] TiDB Cloud Starter 생성과 Flyway 마이그레이션 확인
+- [x] Render 백엔드 배포와 readiness 확인
 - [ ] Cloudflare Pages 프론트엔드 배포와 CORS 연결 확인
 - [ ] 배포 URL에서 회원가입·로그인·스터디 흐름 관통 검증
+
+백엔드 배포 검증 결과:
+
+- [x] Render Singapore 무료 Web Service 배포 성공
+- [x] TiDB Cloud Starter TLS 연결과 Flyway 초기 마이그레이션 성공
+- [x] 배포 readiness `UP` 확인
+- [x] 배포 `/api/studies` 응답 `success: true`, 빈 목록 확인
+
+프론트엔드 배포 진행 중:
+
+- [x] 배포 환경 API 기본 주소 외부화
+- [x] Cloudflare Pages SPA fallback 구성
+- [x] 프론트엔드 테스트·lint·production build 검증
+- [ ] Cloudflare Pages 프로젝트 생성과 배포
+- [ ] 실제 Pages Origin으로 백엔드 CORS 갱신
 
 다음 작업 순서:
 

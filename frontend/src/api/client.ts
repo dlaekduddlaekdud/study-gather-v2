@@ -15,9 +15,19 @@ interface RequestOptions extends Omit<RequestInit, 'body'> {
   token?: string
 }
 
+function resolveApiUrl(path: string): string {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, '')
+
+  if (!baseUrl) {
+    return path
+  }
+
+  return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`
+}
+
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { body, token, headers, ...requestInit } = options
-  const response = await fetch(path, {
+  const response = await fetch(resolveApiUrl(path), {
     ...requestInit,
     headers: {
       ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
