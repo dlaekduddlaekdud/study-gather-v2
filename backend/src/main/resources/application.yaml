@@ -22,6 +22,10 @@ app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
+logging:
+  pattern:
+    level: "%5p [correlationId:%X{correlationId:-none}]"
+
 management:
   endpoints:
     web:

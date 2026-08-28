@@ -20,11 +20,11 @@
 | Section 3. 스터디 생성과 신청 | 완료 | OpenAPI 기반 프론트와 브라우저 관통 흐름 및 CI 완료 |
 | Section 4. 승인·거절·취소·동시성 | 완료 | 프론트 관리 흐름·동시성·강제 rollback 및 CI 완료 |
 | Section 5. API 계약과 테스트 자동화 | 완료 | 계약 검사·Testcontainers·보안·계층·커버리지·프론트 오류 테스트 완료 |
-| Section 6. Docker·배포·운영 | 부분 완료 | CORS 검증 완료, correlation ID 적용 대기 |
+| Section 6. Docker·배포·운영 | 부분 완료 | correlation ID 검증 완료, 오류 응답 traceId 연결 대기 |
 | Section 7. 측정·문서·포트폴리오 | 미착수 | 최종 산출물과 측정 작업 미진행 |
 
-현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 Docker·DB 생명주기와
-CORS 허용·거부 Origin을 검증한 뒤 correlation ID 적용을 준비하는 단계**이다.
+현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 Docker·DB 생명주기,
+CORS, correlation ID 전파와 로그 연결을 검증한 뒤 오류 응답 traceId 연결을 준비하는 단계**이다.
 
 ---
 
@@ -377,7 +377,7 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 - [x] Flyway clean 실행 검증
 - [x] 환경변수 시작 시 검증
 - [x] CORS 설정
-- [ ] correlation ID 적용
+- [x] correlation ID 적용
 - [ ] 오류 응답의 traceId와 로그 연결
 - [x] Actuator health·liveness·readiness 구성
 - [ ] 배포
@@ -435,10 +435,25 @@ CORS 검증 결과:
 - [x] 미허용 Origin preflight `403` 확인
 - [x] Compose 백엔드 재빌드 후 readiness `UP`
 
+correlation ID 진행 중:
+
+- [x] 유효한 `X-Correlation-ID` 전파와 누락 시 UUID 생성
+- [x] 요청 attribute·응답 헤더·MDC 연결
+- [x] 허용 CORS 응답 헤더에 `X-Correlation-ID` 노출
+- [x] 요청 종료 후 MDC 정리
+- [x] API 요청 완료 로그에 correlation ID 출력 구성
+- [x] 단위·통합 테스트와 Compose 로그 검증
+
+correlation ID 검증 결과:
+
+- [x] 사용자 지정 ID가 응답의 `X-Correlation-ID`로 전파됨
+- [x] CORS 응답에서 `X-Correlation-ID` 노출 확인
+- [x] 응답 ID와 MDC 요청 완료 로그의 ID 일치
+- [x] 누락·비정상 ID의 UUID 교체와 요청 종료 후 MDC 정리 테스트 통과
+
 다음 작업 순서:
 
-1. correlation ID를 요청·응답과 로그에 적용한다.
-2. 오류 응답 traceId를 correlation ID와 연결한다.
+1. 오류 응답 traceId를 correlation ID와 연결한다.
 
 ---
 

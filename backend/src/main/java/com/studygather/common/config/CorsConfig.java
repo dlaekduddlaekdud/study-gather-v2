@@ -1,5 +1,6 @@
 package com.studygather.common.config;
 
+import com.studygather.common.logging.CorrelationIdFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -25,8 +26,10 @@ public class CorsConfig {
         ));
         configuration.setAllowedHeaders(List.of(
                 HttpHeaders.AUTHORIZATION,
-                HttpHeaders.CONTENT_TYPE
+                HttpHeaders.CONTENT_TYPE,
+                CorrelationIdFilter.HEADER_NAME
         ));
+        configuration.setExposedHeaders(List.of(CorrelationIdFilter.HEADER_NAME));
         configuration.setAllowCredentials(false);
         configuration.setMaxAge(3600L);
 
