@@ -86,6 +86,9 @@ jobs:
       - name: 프론트엔드 린트
         run: npm run lint
 
+      - name: 프론트엔드 테스트
+        run: npm test
+
       - name: 프론트엔드 타입 검사 및 빌드
         run: npm run build
 
