@@ -20,11 +20,11 @@
 | Section 3. 스터디 생성과 신청 | 완료 | OpenAPI 기반 프론트와 브라우저 관통 흐름 및 CI 완료 |
 | Section 4. 승인·거절·취소·동시성 | 완료 | 프론트 관리 흐름·동시성·강제 rollback 및 CI 완료 |
 | Section 5. API 계약과 테스트 자동화 | 완료 | 계약 검사·Testcontainers·보안·계층·커버리지·프론트 오류 테스트 완료 |
-| Section 6. Docker·배포·운영 | 부분 완료 | README 실행 절차 갱신 후 clean clone 검증 대기 |
+| Section 6. Docker·배포·운영 | 부분 완료 | 로컬 운영·clean clone·README 완료, 배포 대기 |
 | Section 7. 측정·문서·포트폴리오 | 미착수 | 최종 산출물과 측정 작업 미진행 |
 
-현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 로컬 운영 기반을
-README에 반영한 뒤 별도 임시 디렉터리의 clean clone 재현 검증을 기다리는 단계**이다.
+현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 로컬 운영 기반,
+clean clone 재현, README 실행 절차를 검증한 뒤 배포를 준비하는 단계**이다.
 
 ---
 
@@ -381,8 +381,8 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 - [x] 오류 응답의 traceId와 로그 연결
 - [x] Actuator health·liveness·readiness 구성
 - [ ] 배포
-- [ ] clean clone 재현
-- [ ] README 실행 절차 최종 완성
+- [x] clean clone 재현
+- [x] README 실행 절차 최종 완성
 
 장애 검증:
 
@@ -478,12 +478,20 @@ clean clone·README 진행 중:
 - [x] Compose 중심 빠른 시작과 프론트 실행 절차 갱신
 - [x] 환경변수·healthcheck·CORS·correlation ID 운영 절차 문서화
 - [x] 테스트·OpenAPI 계약·데이터 관리·문제 해결 절차 갱신
-- [ ] README 후보 커밋 후 별도 clean clone 재현 검증
+- [x] README 후보 커밋 후 별도 clean clone 재현 검증
+
+clean clone 검증 결과:
+
+- [x] 별도 임시 디렉터리에 현재 브랜치 단일 clone
+- [x] 새 `.env`, 네트워크, MySQL volume에서 Compose 빌드·기동
+- [x] MySQL·백엔드 `healthy`, readiness `UP`, 빈 스터디 목록 확인
+- [x] 백엔드 `check`와 프론트 테스트·lint·build 통과
+- [x] OpenAPI 계약과 생성 타입 일치, clean clone 작업 트리 변경 없음
+- [x] 임시 Compose·volume 정리 후 원본 DB와 기존 데이터 복구
 
 다음 작업 순서:
 
-1. clean clone 실행 재현과 README 절차를 정리한다.
-2. 배포 환경을 구성하고 검증한다.
+1. 배포 환경을 구성하고 검증한다.
 
 ---
 
