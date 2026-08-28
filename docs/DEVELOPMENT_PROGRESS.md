@@ -20,11 +20,11 @@
 | Section 3. 스터디 생성과 신청 | 완료 | OpenAPI 기반 프론트와 브라우저 관통 흐름 및 CI 완료 |
 | Section 4. 승인·거절·취소·동시성 | 완료 | 프론트 관리 흐름·동시성·강제 rollback 및 CI 완료 |
 | Section 5. API 계약과 테스트 자동화 | 완료 | 계약 검사·Testcontainers·보안·계층·커버리지·프론트 오류 테스트 완료 |
-| Section 6. Docker·배포·운영 | 부분 완료 | 오류 traceId 검증 완료, DB 중단 장애 검증 대기 |
+| Section 6. Docker·배포·운영 | 부분 완료 | DB 중단·복구 검증 완료, clean clone·README 정리 대기 |
 | Section 7. 측정·문서·포트폴리오 | 미착수 | 최종 산출물과 측정 작업 미진행 |
 
 현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 Docker·DB 생명주기,
-CORS, correlation ID, 오류 traceId 연결을 검증한 뒤 DB 중단 장애 검증을 준비하는 단계**이다.
+CORS, correlation ID, 오류 traceId, DB 중단·복구를 검증한 뒤 clean clone 재현과 README 정리를 준비하는 단계**이다.
 
 ---
 
@@ -386,7 +386,7 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 
 장애 검증:
 
-- [ ] DB 중단
+- [x] DB 중단
 - [x] 잘못된 JWT
 - [x] 중복 신청
 - [x] 백엔드 재시작 후 데이터 유지 증거 기록
@@ -466,11 +466,17 @@ correlation ID 검증 결과:
 - [x] validation `400`과 인증 `401` 자동화 테스트 통과
 - [x] 전체 백엔드 `check` 통과
 
+DB 장애·복구 검증 결과:
+
+- [x] MySQL 컨테이너 중단 시 DB 연결 실패와 readiness 하락 확인
+- [x] DB 의존 API가 성공하지 않고 연결 실패 로그가 남는지 확인
+- [x] MySQL 재시작 후 백엔드 재시작 없이 두 컨테이너 `healthy` 복구
+- [x] readiness `UP`과 기존 스터디 데이터 조회 확인
+
 다음 작업 순서:
 
-1. DB 중단 시 readiness와 API 장애 동작을 검증한다.
-2. clean clone 실행 재현과 README 절차를 정리한다.
-3. 배포 환경을 구성하고 검증한다.
+1. clean clone 실행 재현과 README 절차를 정리한다.
+2. 배포 환경을 구성하고 검증한다.
 
 ---
 
