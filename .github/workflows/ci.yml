@@ -77,3 +77,53 @@ jobs:
 
       - name: 프론트엔드 타입 검사 및 빌드
         run: npm run build
+
+  api-contract:
+    name: API Contract
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4.11
+        env:
+          MYSQL_DATABASE: study_gather
+          MYSQL_USER: study_gather
+          MYSQL_PASSWORD: study_gather_ci_password
+          MYSQL_ROOT_PASSWORD: root_ci_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -proot_ci_password --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+          --health-start-period=20s
+    env:
+      DB_URL: jdbc:mysql://127.0.0.1:3306/study_gather?serverTimezone=UTC&characterEncoding=UTF-8
+      DB_USERNAME: study_gather
+      DB_PASSWORD: study_gather_ci_password
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      JWT_ACCESS_TOKEN_EXPIRATION: 1h
+    steps:
+      - name: 소스코드 가져오기
+        uses: actions/checkout@v6
+
+      - name: Java 21 설정
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Node.js 24 설정
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 프론트엔드 의존성 설치
+        working-directory: frontend
+        run: npm ci
+
+      - name: OpenAPI 계약 변경 검사
+        run: ./scripts/check-openapi-contract.sh
