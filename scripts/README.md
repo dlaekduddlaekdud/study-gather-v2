@@ -29,3 +29,26 @@ OpenAPI 계약과 생성 타입이 최신 상태입니다.
 
 스크립트는 자체적으로 백엔드를 실행하므로 8080 포트에서 실행 중인 백엔드가 없어야 합니다.
 GitHub Actions의 `API Contract` 작업도 같은 스크립트를 사용합니다.
+
+## OpenAPI 계약 변경 감지 실험
+
+`test-openapi-contract-detection.sh`는 DTO의 OpenAPI 제약 조건을 임시로 변경한 뒤 계약 검사가
+예상대로 실패하는지 확인합니다. 실험 중 변경한 DTO와 생성 산출물은 성공·실패 여부와 관계없이
+원래 상태로 복구합니다.
+
+OpenAPI 계약 변경 검사와 동일하게 MySQL과 환경변수를 준비한 다음 실행합니다.
+
+```bash
+docker compose up -d mysql
+set -a
+source .env
+set +a
+./scripts/test-openapi-contract-detection.sh
+```
+
+정상적으로 변경을 감지하면 다음 메시지를 출력합니다.
+
+```text
+DTO 변경에 따른 OpenAPI 계약 차이를 예상대로 감지했습니다.
+실험에 사용한 DTO와 생성 산출물은 원래 상태로 복구됩니다.
+```
