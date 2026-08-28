@@ -20,11 +20,11 @@
 | Section 3. 스터디 생성과 신청 | 완료 | OpenAPI 기반 프론트와 브라우저 관통 흐름 및 CI 완료 |
 | Section 4. 승인·거절·취소·동시성 | 완료 | 프론트 관리 흐름·동시성·강제 rollback 및 CI 완료 |
 | Section 5. API 계약과 테스트 자동화 | 완료 | 계약 검사·Testcontainers·보안·계층·커버리지·프론트 오류 테스트 완료 |
-| Section 6. Docker·배포·운영 | 부분 완료 | 환경변수 검증과 백엔드 Docker 이미지 빌드 완료, Compose 통합 대기 |
+| Section 6. Docker·배포·운영 | 부분 완료 | MySQL·백엔드 Compose와 healthcheck 완료, 데이터 유지 검증 대기 |
 | Section 7. 측정·문서·포트폴리오 | 미착수 | 최종 산출물과 측정 작업 미진행 |
 
-현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 필수 환경변수
-시작 검증과 백엔드 Docker 이미지 빌드를 완료한 뒤 Compose 통합을 준비하는 단계**이다.
+현재 개발 위치는 **Section 5의 API 계약과 테스트 자동화를 완료하고, Section 6의 MySQL·백엔드
+Compose 통합과 healthcheck 시작 순서를 검증한 뒤 데이터 유지·Flyway 검증을 준비하는 단계**이다.
 
 ---
 
@@ -372,8 +372,8 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 
 상태: **운영 기반 확장 진행 중**
 
-- [ ] Docker Compose에서 MySQL과 백엔드 함께 실행 - 현재 MySQL만 실행
-- [ ] healthcheck와 DB 준비 순서 설정 - MySQL healthcheck만 존재
+- [x] Docker Compose에서 MySQL과 백엔드 함께 실행
+- [x] healthcheck와 DB 준비 순서 설정
 - [ ] Flyway clean 실행 검증
 - [x] 환경변수 시작 시 검증
 - [ ] CORS 설정
@@ -399,18 +399,24 @@ Section 4의 내 신청 목록과 개설자 승인·거절·멤버 화면을 완
 - [x] 설정 바인딩 테스트 9개, JWT 테스트 3개, 전체 백엔드 빌드 통과
 - [x] PR #13의 Backend·Frontend·API Contract CI 통과 및 `main` 병합
 
-현재 진행 중:
+완료한 Docker 이미지 기반:
 
 - [x] Java 21 멀티 스테이지 백엔드 Dockerfile 작성
 - [x] 비루트 사용자로 백엔드 프로세스 실행 구성
 - [x] 로컬 Docker 이미지 빌드 검증
 
+현재 진행 중:
+
+- [x] Compose 백엔드 서비스와 필수 환경변수 구성
+- [x] 컨테이너 내부 DB 주소를 `mysql:3306`으로 분리
+- [x] MySQL `service_healthy` 이후 백엔드 시작 구성
+- [x] 백엔드 readiness healthcheck 구성
+- [x] MySQL·백엔드 Compose 로컬 관통 검증
+
 다음 작업 순서:
 
-1. Docker Compose에서 MySQL과 백엔드를 함께 실행한다.
-2. MySQL healthcheck를 기준으로 백엔드 시작 순서를 구성한다.
-3. Flyway clean 실행과 백엔드 재시작 후 데이터 유지를 검증한다.
-4. CORS, correlation ID, 오류 응답 traceId를 각각 기능 단위로 적용한다.
+1. Flyway clean 실행과 백엔드 재시작 후 데이터 유지를 검증한다.
+2. CORS, correlation ID, 오류 응답 traceId를 각각 기능 단위로 적용한다.
 
 ---
 
