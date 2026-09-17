@@ -13,7 +13,8 @@ async function request(path, { token, body } = {}) {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: body === undefined ? undefined : JSON.stringify(body),
-    signal: AbortSignal.timeout(15000),
+    // 배포 서버가 대기 상태에서 깨어나는 시간까지 기다린다.
+    signal: AbortSignal.timeout(120000),
   })
   const payload = await response.json().catch(() => null)
   if (!response.ok || !payload?.success) {
@@ -70,6 +71,7 @@ function setEnv(source, key, value) {
 }
 
 async function main() {
+  console.log(`데모 준비 서버: ${baseUrl} (첫 응답은 최대 2분 기다립니다.)`)
   // 중간 실패 후 재실행해도 같은 계정으로 이어서 준비한다.
   const saved = await readOptional(fixturePath)
   const fixture = saved ? JSON.parse(saved) : {
@@ -115,6 +117,8 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(`데모 준비 실패: ${error.message}`)
+  console.error(error.name === 'TimeoutError'
+    ? '데모 준비 실패: 서버가 2분 안에 응답하지 않았습니다. Render 서버 상태와 로그를 확인한 뒤 같은 명령을 다시 실행하세요.'
+    : `데모 준비 실패: ${error.message}`)
   process.exitCode = 1
 })
