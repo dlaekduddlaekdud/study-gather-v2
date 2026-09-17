@@ -1,5 +1,6 @@
 .DS_Store
 .env
+.demo-fixtures.json
 
 # 개인 참고 문서
 /spring-start-v20260130/
