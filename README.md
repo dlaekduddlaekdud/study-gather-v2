@@ -43,23 +43,33 @@ v2는 v1 코드를 복사하지 않고 확인된 문제를 다시 설계하고 �
 | Frontend | React, TypeScript, Vite |
 | Contract | springdoc-openapi, openapi-typescript |
 | Test | JUnit 5, MockMvc, Testcontainers, Vitest, JaCoCo |
-| Infrastructure | Docker Compose, GitHub Actions, Render, Cloudflare Pages |
+| Infrastructure | Docker Compose, GitHub Actions, Render, Cloudflare Workers Static Assets |
 
 ## 배포 환경
 
 | 영역 | 주소·서비스 |
 | --- | --- |
-| Frontend | [Cloudflare Pages](https://study-gather-v2.pages.dev) |
+| Frontend | [Cloudflare Workers](https://study-gather-v2.ekdud0112.workers.dev) |
 | Backend | [Render Web Service](https://study-gather-backend.onrender.com) |
 | Database | TiDB Cloud Starter, AWS Singapore |
 | Backend readiness | [배포 readiness](https://study-gather-backend.onrender.com/actuator/health/readiness) |
 
-배포 요청 흐름은 `Browser → Cloudflare Pages → Render → TiDB Cloud`입니다. 프론트엔드는
-`VITE_API_BASE_URL`로 Render 주소를 주입하고, 백엔드는 Pages Origin을 CORS 허용 목록에 둡니다.
+배포 요청 흐름은 `Browser → Cloudflare Workers Static Assets → Render → TiDB Cloud`입니다.
+프론트엔드는 `VITE_API_BASE_URL`로 Render 주소를 주입하고, 백엔드는 Workers Origin을 CORS 허용
+목록에 둡니다.
 Render와 TiDB를 Singapore 리전에 배치해 백엔드와 DB 사이의 리전 간 통신을 피합니다.
 
 무료 Render 인스턴스는 일정 시간 요청이 없으면 중지되므로 첫 요청이 50초 이상 지연될 수 있습니다.
 이 배포는 학습·포트폴리오 검증 환경이며 운영 트래픽을 위한 고가용성 구성은 아닙니다.
+
+### 포트폴리오 데모
+
+- 스터디 목록과 상세는 로그인 없이 바로 확인할 수 있습니다.
+- 로그인 화면의 `데모 계정으로 둘러보기`는 기존 일반 로그인 API로 JWT를 발급합니다.
+- 하나의 데모 계정으로 스터디 생성·참여 신청·내 신청과 운영자의 신청 관리·멤버 조회·수정을
+  체험할 수 있습니다.
+- `[데모]`가 붙은 스터디는 공용 체험 데이터이며, 승인·거절·수정 결과가 다음 방문자에게도
+  반영될 수 있습니다.
 
 ## 디렉터리 구조
 
@@ -265,7 +275,7 @@ curl -i localhost:8080/api/users/me \
 배포 환경에서는 다음 두 Origin을 허용합니다.
 
 ```text
-http://localhost:5173,https://study-gather-v2.pages.dev
+http://localhost:5173,https://study-gather-v2.ekdud0112.workers.dev
 ```
 
 ## 데이터와 컨테이너 관리
